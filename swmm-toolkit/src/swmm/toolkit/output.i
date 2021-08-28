@@ -16,12 +16,20 @@
 /* Docstrings for module */
 %include "output_docs.i"
 
+
 %module(package="swmm.toolkit", docstring=OUTPUT_MODULE_DOCS) output
 %{
 #define SWIG_FILE_WITH_INIT
 
 #include "swmm_output_enums.h"
 #include "swmm_output.h"
+%}
+
+
+//add numpy interface
+%include "numpy.i"
+%init %{
+import_array();
 %}
 
 /* RENAME FUNCTIONS PYTHON STYLE */
@@ -118,6 +126,14 @@ and return a (possibly) different pointer */
     SMO_linkAttribute,
     SMO_systemAttribute
 }
+
+
+/* numpy array types maps */
+
+//2d output array (1 timeseries per column)
+%apply (float** ARGOUTVIEWM_ARRAY2, int *DIM1, int *DIM2) {(float** arr_out, int* dim_out1,int* dim_out2)}
+//1d input array for list of nodes
+%apply (int* IN_ARRAY1, int DIM1) {(int* nodeIndexs, int size_a)}
 
 
 /* INSERTS CUSTOM EXCEPTION HANDLING IN WRAPPER */

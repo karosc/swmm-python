@@ -25,6 +25,8 @@
 %rename(get_link_series)        SMO_getLinkSeries;
 %rename(get_system_series)      SMO_getSystemSeries;
 
+%rename(get_node_array)        SMO_getNodeArray;
+
 %rename(get_subcatch_attribute) SMO_getSubcatchAttribute;
 %rename(get_node_attribute)     SMO_getNodeAttribute;
 %rename(get_link_attribute)     SMO_getLinkAttribute;

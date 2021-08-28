@@ -27,6 +27,9 @@ if(NOT MSVC)
 else()
     find_package (Python3 ${PYTHON_VERSION_STRING} COMPONENTS Interpreter Development REQUIRED)
 endif()
+
+find_package(NumPy REQUIRED)
+
 #set(CMAKE_FIND_DEBUG_MODE FALSE)
 
 

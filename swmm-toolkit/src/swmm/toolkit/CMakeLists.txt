@@ -63,6 +63,7 @@ target_link_options(output
 target_include_directories(output
     PUBLIC
         ${Python3_INCLUDE_DIRS}
+        ${NumPy_INCLUDE_DIRS}
 )
 
 target_link_libraries(output

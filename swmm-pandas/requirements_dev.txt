@@ -1,0 +1,14 @@
+pip
+bump2version
+wheel
+watchdog
+flake8
+coverage
+Sphinx
+twine
+pytest
+black
+numpydoc
+nbsphinx
+pydata-sphinx-theme
+myst-parser

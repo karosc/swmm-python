@@ -1,6 +1,8 @@
 from typing import Sequence, Union
+
 import numpy as np
 import pandas as pd
+
 from swmm.pandas.output.tools import arrayish
 
 volumeConstants = {

@@ -5,20 +5,38 @@ from functools import wraps
 from typing import Callable, List, NoReturn, Optional, Sequence, Tuple, Union
 
 import numpy as np
-import pandas as pd
+from numpy import (
+    ndarray,
+    concatenate,
+    vstack,
+    stack,
+    tile,
+    asarray,
+    atleast_1d,
+    atleast_2d,
+    datetime64,
+    integer as npint,
+)
 from aenum import Enum, extend_enum
 from julian import from_jd
-
-# Third party imports
+from pandas.core.api import (
+    DataFrame,
+    DatetimeIndex,
+    Index,
+    MultiIndex,
+    Timestamp,
+    to_datetime,
+)
 from swmm.toolkit import output, shared_enum
-from swmm.pandas.output.tools import arrayish
-from swmm.pandas.output.structure import Structure
+
 from swmm.pandas.output.enums import (
     link_attribute,
     node_attribute,
     subcatch_attribute,
     system_attribute,
 )
+from swmm.pandas.output.structure import Structure
+from swmm.pandas.output.tools import arrayish
 
 
 def output_open_handler(func):
@@ -75,47 +93,51 @@ class Output(object):
 
         """
         self._binfile = binfile
-        self._period = None
-        self._report = None
-        self._start = None
-        self._end = None
-        self._delete_handle = False
+        self._period: int
+        self._report: int
+        self._start: datetime
+        self._end: datetime
+        self._timeIndex: DatetimeIndex
+        self._project_size: List[int]
+        self._subcatchments: Tuple[str]
+        self._links: Tuple[str]
+        self._pollutants: Tuple[str]
+
+        self._delete_handle: bool = False
         self._handle = None
-        self._loaded = False
-        self._timeIndex = None
-        self._project_size = None
-        self._subcatchments = None
-        self._nodes = None
-        self._links = None
-        self._pollutants = None
+        self._loaded: bool = False
 
         # have to copy attribute dicts since they are edited
         # to include pollutants when outfile is opened
         # editing global attributes would break things
         # if more than one output object was created
         # from different output files
-        self.subcatch_attributes = subcatch_attribute.copy()
-        self.node_attributes = node_attribute.copy()
-        self.link_attributes = link_attribute.copy()
-        self.system_attributes = system_attribute.copy()
+        self.subcatch_attributes: dict = subcatch_attribute.copy()
+        self.node_attributes: dict = node_attribute.copy()
+        self.link_attributes: dict = link_attribute.copy()
+        self.system_attributes: dict = system_attribute.copy()
 
         # need copies of enumes to extend them for pollutants
-        # looked into using swmm.toolkit.output_metadata but it
-        # extends global enums, which can break having multiple
-        # output objects opened in the same python session.
+        # basically recreate enums using the keys from shared_enum
+        # but drop POLLUT_CONC_0 for each
+        #
+        # I looked into using swmm.toolkit.output_metadata for this but it
+        # extends global enums, which could break having multiple
+        # output objects opened in the same python session if they
+        # have different pollutant names
         self._subcatchAttrEnum = Enum(
             "SubcatchAttribute",
-            list(shared_enum.SubcatchAttribute.__members__.keys()),
+            list(shared_enum.SubcatchAttribute.__members__.keys())[:-1],
             start=0,
         )
         self._nodeAttrEnum = Enum(
             "NodeAttribute",
-            list(shared_enum.NodeAttribute.__members__.keys()),
+            list(shared_enum.NodeAttribute.__members__.keys())[:-1],
             start=0,
         )
         self._linkAttrEnum = Enum(
             "LinkAttribute",
-            list(shared_enum.LinkAttribute.__members__.keys()),
+            list(shared_enum.LinkAttribute.__members__.keys())[:-1],
             start=0,
         )
 
@@ -149,7 +171,7 @@ class Output(object):
 
         """
 
-        if isinstance(elementID, (int, np.integer)):
+        if isinstance(elementID, (int, npint)):
             return int(elementID)
 
         try:
@@ -190,7 +212,7 @@ class Output(object):
         # put it into a funciton
 
         if attribute is None:
-            attributeArray = validAttributes
+            attributeArray = list(validAttributes)
         elif isinstance(attribute, arrayish):
             attributeArray = attribute
         else:
@@ -205,7 +227,7 @@ class Output(object):
                 attributeArray[i] = attrib.name.lower()
                 attributeIndexArray.append(attrib)
 
-            elif isinstance(attrib, (int, np.integer)):
+            elif isinstance(attrib, (int, npint)):
                 # will raise index error if not in range
                 attribName = list(validAttributes)[attrib]
                 attributeArray[i] = attribName
@@ -267,7 +289,7 @@ class Output(object):
         # with integer indicies in the same input list
         for i, elem in enumerate(elementArray):
 
-            if isinstance(elem, (int, np.integer)):
+            if isinstance(elem, (int, npint)):
                 # will raise index error if not in range
                 elemName = validElements[elem]
                 elementArray[i] = elemName
@@ -341,14 +363,15 @@ class Output(object):
 
             self._loaded = True
             output.open(self._handle, self._binfile)
-            self._start = from_jd(output.get_start_date(self._handle) + 2415018.5)
-            self._start = self._start.replace(microsecond=0)
+            self._start = from_jd(
+                output.get_start_date(self._handle) + 2415018.5
+            ).replace(microsecond=0)
             self._report = output.get_times(self._handle, shared_enum.Time.REPORT_STEP)
             self._period = output.get_times(self._handle, shared_enum.Time.NUM_PERIODS)
             self._end = self._start + timedelta(seconds=self._period * self._report)
 
             # load pollutants if not already loaded
-            if self._pollutants is None:
+            if not hasattr(self, "_pollutants"):
                 # load pollutant data if it has not before
                 total = self.project_size[4]
                 self._pollutants = tuple(
@@ -358,21 +381,16 @@ class Output(object):
                     for index in range(total)
                 )
 
-                # extend enums to include pollutants
-                for i in range(1, total):
-                    symbolic_name = "POLLUT_CONC_" + str(i)
-                    extend_enum(self._subcatchAttrEnum, symbolic_name, 8 + i)
-                    extend_enum(self._nodeAttrEnum, symbolic_name, 6 + i)
-                    extend_enum(self._linkAttrEnum, symbolic_name, 5 + i)
-
                 for i, nom in enumerate(self._pollutants):
-                    symbolic_name = "POLLUT_CONC_" + str(i)
+                    # extend enums to include pollutants
+                    extend_enum(self._subcatchAttrEnum, nom.upper(), 8 + i)
+                    extend_enum(self._nodeAttrEnum, nom.upper(), 6 + i)
+                    extend_enum(self._linkAttrEnum, nom.upper(), 5 + i)
 
-                    self.subcatch_attributes[nom] = self._subcatchAttrEnum[
-                        symbolic_name
-                    ]
-                    self.node_attributes[nom] = self._nodeAttrEnum[symbolic_name]
-                    self.link_attributes[nom] = self._linkAttrEnum[symbolic_name]
+                    # add lower case pollutant names to enum dicts
+                    self.subcatch_attributes[nom] = self._subcatchAttrEnum[nom.upper()]
+                    self.node_attributes[nom] = self._nodeAttrEnum[nom.upper()]
+                    self.link_attributes[nom] = self._linkAttrEnum[nom.upper()]
 
         return True
 
@@ -397,7 +415,7 @@ class Output(object):
 
     ###### outfile property getters ######
 
-    @property
+    @property  # type: ignore
     @output_open_handler
     def report(self) -> int:
         """Return the reporting timestep in seconds.
@@ -413,7 +431,7 @@ class Output(object):
         """
         return self._report
 
-    @property
+    @property  # type: ignore
     @output_open_handler
     def start(self) -> datetime:
         """Return the reporting start datetime.
@@ -429,7 +447,7 @@ class Output(object):
         """
         return self._start
 
-    @property
+    @property  # type: ignore
     @output_open_handler
     def end(self) -> datetime:
         """Return the reporting end datetime.
@@ -441,7 +459,7 @@ class Output(object):
         """
         return self._end
 
-    @property
+    @property  # type: ignore
     @output_open_handler
     def period(self) -> int:
         """Return the number of reporting timesteps in the binary output file.
@@ -453,7 +471,7 @@ class Output(object):
         """
         return self._period
 
-    @property
+    @property  # type: ignore
     def project_size(self) -> List[int]:
         """Returns the number of each model element type available in out binary output file
         in the following order:
@@ -471,7 +489,7 @@ class Output(object):
             [nSubcatchments, nNodes, nLinks, nSystems(1), nPollutants]
 
         """
-        if self._project_size is None:
+        if not hasattr(self, "_project_size"):
             self._load_project_size()
         return self._project_size
 
@@ -505,7 +523,7 @@ class Output(object):
 
         return self._pollutants
 
-    @property
+    @property  # type: ignore
     @output_open_handler
     def _unit(self) -> Tuple[int]:
         """Return SWMM binary output file unit type from `swmm.toolkit.shared_enum.UnitSystem`.
@@ -519,7 +537,7 @@ class Output(object):
             Tuple of integers indicating system units, flow units, and units for each pollutant.
 
         """
-        return tuple(output.get_units(self._handle))
+        return tuple(output.get_units(self._handle))  # type: ignore
 
     @property
     def units(self):
@@ -539,7 +557,7 @@ class Output(object):
             shared_enum.FlowUnits(self._unit[1]).name,
         ] + [shared_enum.ConcUnits(i).name for i in self._unit[2:]]
 
-    @property
+    @property  # type: ignore
     @output_open_handler
     def _version(self) -> int:
         """Return SWMM version used to generate SWMM binary output file results.
@@ -582,9 +600,9 @@ class Output(object):
             str,
             int,
             datetime,
-            pd.Timestamp,
-            np.datetime64,
-            Sequence[Union[str, int, datetime, pd.Timestamp, np.datetime64]],
+            Timestamp,
+            datetime64,
+            Sequence[Union[str, int, datetime, Timestamp, datetime64]],
         ],
         ifNone: int = 0,
         method: str = "nearest",
@@ -616,17 +634,17 @@ class Output(object):
         if dateTime is None:
             return [ifNone]
 
-        dt = np.asarray(dateTime).flatten()
+        dt = asarray(dateTime).flatten()
         # if passing swmm time step, no indexing necessary
         if dt.dtype == int:
             return dt.tolist()
 
         # ensure datetime value
-        dt = pd.to_datetime(dateTime)
+        dt = to_datetime(dateTime)
         return self.timeIndex.get_indexer(dt, method=method).tolist()
 
     @property
-    def timeIndex(self) -> pd.DatetimeIndex:
+    def timeIndex(self) -> DatetimeIndex:
         """Returns DatetimeIndex of reporting timeseries in binary output file.
 
         Parameters
@@ -640,14 +658,14 @@ class Output(object):
             .. _DatetimeIndex: https://pandas.pydata.org/docs/reference/api/pandas.DatetimeIndex.html?highlight=datetimeindex#pandas.DatetimeIndex
 
         """
-        if self._timeIndex is None:
+        if not hasattr(self, "_timeIndex"):
             self._load_timeIndex()
         return self._timeIndex
 
     @output_open_handler
     def _load_timeIndex(self) -> NoReturn:
         """Load model reporting times into self._times"""
-        self._timeIndex = pd.DatetimeIndex(
+        self._timeIndex = DatetimeIndex(
             [
                 self._start + timedelta(seconds=self._report) * step
                 for step in range(1, self._period + 1)
@@ -693,7 +711,7 @@ class Output(object):
             A tuple of model subcatchment names.
 
         """
-        if self._subcatchments is None:
+        if not hasattr(self, "_subcatchments"):
             self._load_subcatchments()
         return self._subcatchments
 
@@ -742,7 +760,7 @@ class Output(object):
             A tuple of model node names.
 
         """
-        if self._nodes is None:
+        if not hasattr(self, "_nodes"):
             self._load_nodes()
         return self._nodes
 
@@ -790,7 +808,7 @@ class Output(object):
             A tuple of model link names.
 
         """
-        if self._links is None:
+        if not hasattr(self, "_links"):
             self._load_links()
         return self._links
 
@@ -798,6 +816,7 @@ class Output(object):
     def _load_links(self) -> NoReturn:
         """Load model links into self._links"""
         total = self.project_size[2]
+
         self._links = tuple(
             self._objectName(shared_enum.ElementType.LINK, index)
             for index in range(total)
@@ -806,13 +825,54 @@ class Output(object):
     ####### series getters #######
     def _model_series(
         self,
-        elementIndexArray: list,
-        attributeIndexArray: list,
+        elementIndexArray: List[int],
+        attributeIndexArray: List[Enum],
         startIndex: int,
         endIndex: int,
-        columns: str,
+        columns: Optional[str],
         getterFunc: Callable,
-    ):
+    ) -> ndarray:
+        """
+        Base series getter for any attribute. The function consilidates the logic
+        necessary to build long or wide timeseries dataframes for each type of swmm
+        model element.
+
+        Parameters
+        ----------
+        elementIndexArray : List[int]
+            Array of SWMM model element indicies
+        attributeIndexArray : List[enum]
+            Array of attribute Enums to pull for each element
+        startIndex : int
+            SWMM simulation time index to start timeseries
+        endIndex : int
+            SWMM simulation time index to end timeseries
+        columns : Optional[str]
+             Decide whether or not to break out elements or attributes as columns. May be one of:
+
+             None   : Return long-form data with one column for each data point
+
+            'elem' : Return data with a column for each element. If more than one attribute are given, attribute names are added to the index.
+
+            'attr' : Return data with a column for each attribute. If more than one element are given, element names are added to the index.
+
+        getterFunc : Callable
+            The swmm.toolkit series getter function. Should be one of:
+
+             swmm.toolkit.output.get_subcatch_series
+             swmm.toolkit.output.get_node_series
+             swmm.toolkit.output.get_link_series
+
+        Returns
+        -------
+        np.ndarray
+            array of SWMM timeseries results
+
+        Raises
+        ------
+        ValueError
+            Value error if columns is not one of "elem", "attr", or None
+        """
 
         if columns not in ("elem", "attr", None):
             raise ValueError(
@@ -820,9 +880,9 @@ class Output(object):
             )
 
         if columns is None:
-            return np.concatenate(
+            return concatenate(
                 [
-                    np.concatenate(
+                    concatenate(
                         [
                             getterFunc(
                                 self._handle, elemIdx, Attr, startIndex, endIndex
@@ -837,9 +897,9 @@ class Output(object):
             )
 
         elif columns.lower() == "attr":
-            return np.concatenate(
+            return concatenate(
                 [
-                    np.stack(
+                    stack(
                         [
                             getterFunc(
                                 self._handle, elemIdx, Attr, startIndex, endIndex
@@ -854,9 +914,9 @@ class Output(object):
             )
 
         elif columns.lower() == "elem":
-            return np.concatenate(
+            return concatenate(
                 [
-                    np.stack(
+                    stack(
                         [
                             getterFunc(
                                 self._handle, elemIdx, Attr, startIndex, endIndex
@@ -872,19 +932,55 @@ class Output(object):
 
     def _model_series_index(
         self,
-        elementArray: list,
-        attributeArray: list,
+        elementArray: List[str],
+        attributeArray: List[str],
         startIndex: int,
         endIndex: int,
-        columns: str,
-    ):
+        columns: Optional[str],
+    ) -> tuple:
+        """
+        Base dataframe index getter for model timeseries. The function consilidates the logic
+        necessary to build a data frame index for long or wide dataframes built with time series
+        getters.
+
+        Parameters
+        ----------
+        elementArray : List[str]
+            Array of SWMM model element names
+        attributeArray : List[str]
+            Array of attribute names pulled for each element
+        startIndex : int
+            SWMM simulation time index to start timeseries
+        endIndex : int
+            SWMM simulation time index to end timeseries
+        columns : Optional[str]
+             Decide whether or not to break out elements or attributes as columns. May be one of:
+
+             None   : Return long-form data with one column for each data point
+
+            'elem' : Return data with a column for each element. If more than one attribute are given, attribute names are added to the index.
+
+            'attr' : Return data with a column for each attribute. If more than one element are given, element names are added to the index.
+
+        Returns
+        -------
+        (pd.MultiIndex, Union[list,np.ndarray])
+            A pandas MultiIndex for the row indicies and an iterable of column names
+
+        Raises
+        ------
+        ValueError
+            Value error if columns is not one of "elem", "attr", or None
+
+        """
+
         if columns not in ("elem", "attr", None):
             raise ValueError(
                 f"columns must be one of 'elem','attr', or None. {columns} was given"
             )
 
         if columns is None:
-            dtIndex = np.tile(
+            dtIndex = tile(
                 self.timeIndex[startIndex:endIndex],
                 len(elementArray) * len(attributeArray),
             )
@@ -893,44 +989,42 @@ class Output(object):
             cols = ["Result"]
             if len(elementArray) > 1:
                 indexArrays.append(
-                    np.asarray(elementArray).repeat(
+                    asarray(elementArray).repeat(
                         (endIndex - startIndex) * len(attributeArray)
                     )
                 )
                 names.append("element")
             if len(attributeArray) > 1:
                 indexArrays.append(
-                    np.tile(np.asarray(attributeArray), len(elementArray)).repeat(
+                    tile(asarray(attributeArray), len(elementArray)).repeat(
                         endIndex - startIndex
                     )
                 )
                 names.append("attribute")
 
         elif columns.lower() == "attr":
-            dtIndex = np.tile(self.timeIndex[startIndex:endIndex], len(elementArray))
+            dtIndex = tile(self.timeIndex[startIndex:endIndex], len(elementArray))
             indexArrays = [dtIndex]
             names = ["datetime"]
             cols = attributeArray
             if len(elementArray) > 1:
-                indexArrays.append(
-                    np.asarray(elementArray).repeat(endIndex - startIndex)
-                )
+                indexArrays.append(asarray(elementArray).repeat(endIndex - startIndex))
                 names.append("element")
 
         elif columns.lower() == "elem":
-            dtIndex = np.tile(self.timeIndex[startIndex:endIndex], len(attributeArray))
+            dtIndex = tile(self.timeIndex[startIndex:endIndex], len(attributeArray))
             indexArrays = [dtIndex]
             names = ["datetime"]
             cols = elementArray
 
             if len(attributeArray) > 1:
                 indexArrays.append(
-                    np.asarray(attributeArray).repeat(endIndex - startIndex)
+                    asarray(attributeArray).repeat(endIndex - startIndex)
                 )
                 names.append("attribute")
 
         return (
-            pd.MultiIndex.from_arrays(
+            MultiIndex.from_arrays(
                 indexArrays,
                 names=names,
             ),
@@ -940,7 +1034,7 @@ class Output(object):
     def subcatch_series(
         self,
         subcatchment: Union[int, str, Sequence[Union[int, str]], None],
-        attribute: Union[int, str, Sequence[Union[int, str]], None] = (
+        attribute: Union[int, str, Enum, Sequence[Union[int, str, Enum]], None] = (
             "rainfall",
             "runoff_rate",
             "gw_outflow_rate",
@@ -949,7 +1043,7 @@ class Output(object):
         end: Union[str, int, datetime, None] = None,
         columns: Optional[str] = "attr",
         asframe: bool = True,
-    ) -> Union[pd.DataFrame, np.ndarray]:
+    ) -> Union[DataFrame, ndarray]:
         """Get one or more time series for one or more subcatchment attributes.
         Specify series start index and end index to get desired time range.
 
@@ -958,7 +1052,7 @@ class Output(object):
         subcatchment : Union[int, str, Sequence[Union[int, str]], None]
             The subcatchment index or name.
 
-        attribute : Union[int, str, Sequence[Union[int, str]], None],
+        attribute : Union[int, str, Enum, Sequence[Union[int, str, Enum]], None],
             The attribute index or name.
 
             On of:
@@ -970,7 +1064,7 @@ class Output(object):
             Defaults to: `('rainfall','runoff_rate','gw_outflow_rate').`
 
 
-            You can also input the integer index of the attribute you would like to
+            Can also input the integer index of the attribute you would like to
             pull or the actual enum from swmm.toolkit.shared_enum.SubcatchAttribute.
 
             Setting to None indicates all attributes.
@@ -1032,13 +1126,13 @@ class Output(object):
         dfIndex, cols = self._model_series_index(
             subcatchementArray, attributeArray, startIndex, endIndex, columns
         )
-        return pd.DataFrame(values, index=dfIndex, columns=cols)
+        return DataFrame(values, index=dfIndex, columns=cols)
 
     @output_open_handler
     def node_series(
         self,
         node: Union[int, str, Sequence[Union[int, str]], None],
-        attribute: Union[int, str, Sequence[Union[int, str]], None] = (
+        attribute: Union[int, str, Enum, Sequence[Union[int, str, Enum]], None] = (
             "invert_depth",
             "flooding_losses",
             "total_inflow",
@@ -1047,7 +1141,7 @@ class Output(object):
         end: Union[str, int, datetime, None] = None,
         columns: Optional[str] = "attr",
         asframe: bool = True,
-    ) -> Union[pd.DataFrame, np.ndarray]:
+    ) -> Union[DataFrame, ndarray]:
         """Get one or more time series for one or more node attributes.
         Specify series start index and end index to get desired time range.
 
@@ -1056,7 +1150,7 @@ class Output(object):
         node : Union[int, str, Sequence[Union[int, str]], None]
             The node index or name.
 
-        attribute : Union[int, str, Sequence[Union[int, str]], None],
+        attribute : Union[int, str, Enum, Sequence[Union[int, str, Enum]], None],
             The attribute index or name.
 
             On of:
@@ -1066,7 +1160,7 @@ class Output(object):
 
             defaults to: `('invert_depth','flooding_losses','total_inflow')`
 
-            You can also input the integer index of the attribute you would like to
+            Can also input the integer index of the attribute you would like to
             pull or the actual enum from swmm.toolkit.shared_enum.NodeAttribute.
 
             Setting to None indicates all attributes.
@@ -1127,13 +1221,13 @@ class Output(object):
             nodeArray, attributeArray, startIndex, endIndex, columns
         )
 
-        return pd.DataFrame(values, index=dfIndex, columns=cols)
+        return DataFrame(values, index=dfIndex, columns=cols)
 
     @output_open_handler
     def link_series(
         self,
         link: Union[int, str, Sequence[Union[int, str]], None],
-        attribute: Union[int, str, Sequence[Union[int, str]], None] = (
+        attribute: Union[int, str, Enum, Sequence[Union[int, str, Enum]], None] = (
             "flow_rate",
             "flow_velocity",
             "flow_depth",
@@ -1142,7 +1236,7 @@ class Output(object):
         end: Union[int, str, datetime, None] = None,
         columns: Optional[str] = "attr",
         asframe: bool = True,
-    ) -> Union[pd.DataFrame, np.ndarray]:
+    ) -> Union[DataFrame, ndarray]:
         """Get one or more time series for one or more link attributes.
         Specify series start index and end index to get desired time range.
 
@@ -1151,7 +1245,7 @@ class Output(object):
         link : Union[int, str, Sequence[Union[int, str]], None]
             The link index or name.
 
-        attribute : Union[int, str, Sequence[Union[int, str]], None]
+        attribute : Union[int, str, Enum, Sequence[Union[int, str, Enum]], None]
             The attribute index or name.
 
             On of:
@@ -1160,7 +1254,7 @@ class Output(object):
 
             defaults to: `('flow_rate','flow_velocity','flow_depth')`
 
-            You can also input the integer index of the attribute you would like to
+            Can also input the integer index of the attribute you would like to
             pull or the actual enum from swmm.toolkit.shared_enum.LinkAttribute.
 
             Setting to None indicates all attributes.
@@ -1221,22 +1315,22 @@ class Output(object):
             linkArray, attributeArray, startIndex, endIndex, columns
         )
 
-        return pd.DataFrame(values, index=dfIndex, columns=cols)
+        return DataFrame(values, index=dfIndex, columns=cols)
 
     @output_open_handler
     def system_series(
         self,
-        attribute: Union[int, str, Sequence[Union[int, str]], None] = None,
+        attribute: Union[int, str, Enum, Sequence[Union[int, str, Enum]], None] = None,
         start: Union[str, int, datetime, None] = None,
         end: Union[str, int, datetime, None] = None,
         asframe: bool = True,
-    ) -> Union[pd.DataFrame, np.ndarray]:
+    ) -> Union[DataFrame, ndarray]:
         """Get one or more a time series for one or more system attributes.
         Specify series start index and end index to get desired time range.
 
         Parameters
         ----------
-        attribute : Union[int, str, Sequence[Union[int, str]], None]
+        attribute : Union[int, str, Enum, Sequence[Union[int, str, Enum]], None]
             The attribute index or name.
 
             On of:
@@ -1247,7 +1341,7 @@ class Output(object):
 
             defaults to `None`.
 
-            You can also input the integer index of the attribute you would like to
+            Can also input the integer index of the attribute you would like to
             pull or the actual enum from swmm.toolkit.shared_enum.SystemAttribute.
 
             Setting to None indicates all attributes.
@@ -1279,7 +1373,7 @@ class Output(object):
         startIndex = self._time2step(start, 0)[0]
         endIndex = self._time2step(end, self._period)[0]
 
-        values = np.stack(
+        values = stack(
             [
                 output.get_system_series(self._handle, sysAttr, startIndex, endIndex)
                 for sysAttr in attributeIndexArray
@@ -1290,8 +1384,8 @@ class Output(object):
         if not asframe:
             return values
 
-        dfIndex = pd.Index(self.timeIndex[startIndex:endIndex], name="datetime")
-        return pd.DataFrame(values, index=dfIndex, columns=attributeArray)
+        dfIndex = Index(self.timeIndex[startIndex:endIndex], name="datetime")
+        return DataFrame(values, index=dfIndex, columns=attributeArray)
 
     ####### attribute getters #######
 
@@ -1299,13 +1393,13 @@ class Output(object):
     def subcatch_attribute(
         self,
         time: Union[str, int, datetime],
-        attribute: Union[int, str, Sequence[Union[int, str]], None] = (
+        attribute: Union[int, str, Enum, Sequence[Union[int, str, Enum]], None] = (
             "rainfall",
             "runoff_rate",
             "gw_outflow_rate",
         ),
         asframe: bool = True,
-    ) -> Union[pd.DataFrame, np.ndarray]:
+    ) -> Union[DataFrame, ndarray]:
         """For all subcatchments at a given time, get a one or more attributes.
 
         Parameters
@@ -1313,7 +1407,7 @@ class Output(object):
         time : Union[str, int, datetime]
             The datetime or simulation index for which to pull data, defaults to None.
 
-        attribute : Union[int, str, Sequence[Union[int, str]], None],
+        attribute : Union[int, str, Enum, Sequence[Union[int, str, Enum]], None],
             The attribute index or name.
 
             On of:
@@ -1344,7 +1438,7 @@ class Output(object):
 
         timeIndex = self._time2step([time])[0]
 
-        values = np.stack(
+        values = stack(
             [
                 output.get_subcatch_attribute(self._handle, timeIndex, scAttr)
                 for scAttr in attributeIndexArray
@@ -1355,21 +1449,21 @@ class Output(object):
         if not asframe:
             return values
 
-        dfIndex = pd.Index(self.subcatchments, name="subcatchment")
+        dfIndex = Index(self.subcatchments, name="subcatchment")
 
-        return pd.DataFrame(values, index=dfIndex, columns=attributeArray)
+        return DataFrame(values, index=dfIndex, columns=attributeArray)
 
     @output_open_handler
     def node_attribute(
         self,
         time: Union[str, int, datetime],
-        attribute: Union[int, str, Sequence[Union[int, str]], None] = (
+        attribute: Union[int, str, Enum, Sequence[Union[int, str, Enum]], None] = (
             "invert_depth",
             "flooding_losses",
             "total_inflow",
         ),
         asframe: bool = True,
-    ) -> Union[pd.DataFrame, np.ndarray]:
+    ) -> Union[DataFrame, ndarray]:
         """For all nodes at a given time, get one or more attributes.
 
         Parameters
@@ -1377,7 +1471,7 @@ class Output(object):
         time : Union[str, int, datetime]
             The datetime or simulation index for which to pull data, defaults to None
 
-        attribute : Union[int, str, Sequence[Union[int, str]], None],
+        attribute : Union[int, str, Enum, Sequence[Union[int, str, Enum]], None],
             The attribute index or name.
 
             On of:
@@ -1387,7 +1481,7 @@ class Output(object):
 
             defaults to: `('invert_depth','flooding_losses','total_inflow')`
 
-            You can also input the integer index of the attribute you would like to
+            Can also input the integer index of the attribute you would like to
             pull or the actual enum from swmm.toolkit.shared_enum.NodeAttribute.
 
             Setting to None indicates all attributes.
@@ -1407,7 +1501,7 @@ class Output(object):
 
         timeIndex = self._time2step([time])[0]
 
-        values = np.stack(
+        values = stack(
             [
                 output.get_node_attribute(self._handle, timeIndex, ndAttr)
                 for ndAttr in attributeIndexArray
@@ -1418,21 +1512,21 @@ class Output(object):
         if not asframe:
             return values
 
-        dfIndex = pd.Index(self.nodes, name="node")
+        dfIndex = Index(self.nodes, name="node")
 
-        return pd.DataFrame(values, index=dfIndex, columns=attributeArray)
+        return DataFrame(values, index=dfIndex, columns=attributeArray)
 
     @output_open_handler
     def link_attribute(
         self,
         time: Union[str, int, datetime],
-        attribute: Union[int, str, Sequence[Union[int, str]], None] = (
+        attribute: Union[int, str, Enum, Sequence[Union[int, str, Enum]], None] = (
             "flow_rate",
             "flow_velocity",
             "flow_depth",
         ),
         asframe: bool = True,
-    ) -> Union[pd.DataFrame, np.ndarray]:
+    ) -> Union[DataFrame, ndarray]:
         """For all links at a given time, get one or more attributes.
 
         Parameters
@@ -1449,7 +1543,7 @@ class Output(object):
 
             defaults to `('flow_rate','flow_velocity','flow_depth')`
 
-            You can also input the integer index of the attribute you would like to
+            Can also input the integer index of the attribute you would like to
             pull or the actual enum from swmm.toolkit.shared_enum.LinkAttribute.
 
             Setting to None indicates all attributes.
@@ -1469,7 +1563,7 @@ class Output(object):
 
         timeIndex = self._time2step([time])[0]
 
-        values = np.stack(
+        values = stack(
             [
                 output.get_link_attribute(self._handle, timeIndex, lnkAttr)
                 for lnkAttr in attributeIndexArray
@@ -1480,17 +1574,17 @@ class Output(object):
         if not asframe:
             return values
 
-        dfIndex = pd.Index(self.links, name="link")
+        dfIndex = Index(self.links, name="link")
 
-        return pd.DataFrame(values, index=dfIndex, columns=attributeArray)
+        return DataFrame(values, index=dfIndex, columns=attributeArray)
 
     @output_open_handler
     def system_attribute(
         self,
         time: Union[str, int, datetime],
-        attribute: Union[int, str, Sequence[Union[int, str]], None] = None,
+        attribute: Union[int, str, Enum, Sequence[Union[int, str, Enum]], None] = None,
         asframe=True,
-    ) -> Union[pd.DataFrame, np.ndarray]:
+    ) -> Union[DataFrame, ndarray]:
         """For all nodes at given time, get a one or more attributes.
 
         Parameters
@@ -1509,7 +1603,7 @@ class Output(object):
 
             defaults to `None`.
 
-            You can also input the integer index of the attribute you would like to
+            Can also input the integer index of the attribute you would like to
             pull or the actual enum from swmm.toolkit.shared_enum.SystemAttribute.
 
             Setting to None indicates all attributes.
@@ -1530,7 +1624,7 @@ class Output(object):
 
         timeIndex = self._time2step([time])[0]
 
-        values = np.asarray(
+        values = asarray(
             [
                 output.get_system_attribute(self._handle, timeIndex, sysAttr)
                 for sysAttr in attributeIndexArray
@@ -1540,9 +1634,9 @@ class Output(object):
         if not asframe:
             return values
 
-        dfIndex = pd.Index(attributeArray, name="attribute")
+        dfIndex = Index(attributeArray, name="attribute")
 
-        return pd.DataFrame(values, index=dfIndex, columns=["result"])
+        return DataFrame(values, index=dfIndex, columns=["result"])
 
     ####### result getters #######
 
@@ -1552,7 +1646,7 @@ class Output(object):
         subcatchment: Union[int, str, Sequence[Union[int, str]], None],
         time: Union[int, str, Sequence[Union[int, str]], None],
         asframe: bool = True,
-    ) -> Union[pd.DataFrame, np.ndarray]:
+    ) -> Union[DataFrame, ndarray]:
         """For a subcatchment at one or more given times, get all attributes.
 
         Only one of `subcatchment` or `time` can be multiple (eg. a list), not both.
@@ -1583,7 +1677,7 @@ class Output(object):
             labels, indices = self._validateElement(subcatchment, self.subcatchments)
             timeIndex = self._time2step([time])[0]
 
-            values = np.vstack(
+            values = vstack(
                 [
                     output.get_subcatch_result(self._handle, timeIndex, idx)
                     for idx in indices
@@ -1592,7 +1686,7 @@ class Output(object):
 
         else:
             label = "datetime"
-            times = self.timeIndex if time is None else np.atleast_1d(time)
+            times = self.timeIndex if time is None else atleast_1d(time)
             indices = self._time2step(times)
 
             # since the timeIndex matches on nearst, we rebuild
@@ -1600,8 +1694,8 @@ class Output(object):
             labels = self.timeIndex[indices]
             subcatchmentIndex = self._subcatchmentIndex(subcatchment)
 
-            values = np.atleast_2d(
-                np.vstack(
+            values = atleast_2d(
+                vstack(
                     [
                         output.get_subcatch_result(self._handle, idx, subcatchmentIndex)
                         for idx in indices
@@ -1612,9 +1706,9 @@ class Output(object):
         if not asframe:
             return values
 
-        dfIndex = pd.Index(labels, name=label)
+        dfIndex = Index(labels, name=label)
 
-        return pd.DataFrame(
+        return DataFrame(
             values, index=dfIndex, columns=list(self.subcatch_attributes.keys())
         )
 
@@ -1624,7 +1718,7 @@ class Output(object):
         node: Union[int, str, Sequence[Union[int, str]], None],
         time: Union[int, str, Sequence[Union[int, str]], None],
         asframe: bool = True,
-    ) -> Union[pd.DataFrame, np.ndarray]:
+    ) -> Union[DataFrame, ndarray]:
         """For one or more nodes at one or more given times, get all attributes.
 
         Only one of `node` or `time` can be multiple (eg. a list), not both.
@@ -1653,7 +1747,7 @@ class Output(object):
             label = "node"
             labels, indices = self._validateElement(node, self.nodes)
             timeIndex = self._time2step([time])[0]
-            values = np.vstack(
+            values = vstack(
                 [
                     output.get_node_result(self._handle, timeIndex, idx)
                     for idx in indices
@@ -1662,7 +1756,7 @@ class Output(object):
 
         else:
             label = "datetime"
-            times = self.timeIndex if time is None else np.atleast_1d(time)
+            times = self.timeIndex if time is None else atleast_1d(time)
             indices = self._time2step(times)
 
             # since the timeIndex matches on nearst, we rebuild
@@ -1670,8 +1764,8 @@ class Output(object):
             labels = self.timeIndex[indices]
             nodeIndex = self._nodeIndex(node)
 
-            values = np.atleast_2d(
-                np.vstack(
+            values = atleast_2d(
+                vstack(
                     [
                         output.get_node_result(self._handle, idx, nodeIndex)
                         for idx in indices
@@ -1682,9 +1776,9 @@ class Output(object):
         if not asframe:
             return values
 
-        dfIndex = pd.Index(labels, name=label)
+        dfIndex = Index(labels, name=label)
 
-        return pd.DataFrame(
+        return DataFrame(
             values, index=dfIndex, columns=list(self.node_attributes.keys())
         )
 
@@ -1694,7 +1788,7 @@ class Output(object):
         link: Union[int, str, Sequence[Union[int, str]], None],
         time: Union[int, str, Sequence[Union[int, str]], None],
         asframe: bool = True,
-    ) -> Union[pd.DataFrame, np.ndarray]:
+    ) -> Union[DataFrame, ndarray]:
         """For a link at one or more given times, get all attributes.
 
         Only one of link or time can be multiple.
@@ -1724,7 +1818,7 @@ class Output(object):
             labels, indices = self._validateElement(link, self.links)
             timeIndex = self._time2step([time])[0]
 
-            values = np.vstack(
+            values = vstack(
                 [
                     output.get_link_result(self._handle, timeIndex, idx)
                     for idx in indices
@@ -1733,7 +1827,7 @@ class Output(object):
 
         else:
             label = "datetime"
-            times = self.timeIndex if time is None else np.atleast_1d(time)
+            times = self.timeIndex if time is None else atleast_1d(time)
             indices = self._time2step(times)
 
             # since the timeIndex matches on nearst, we rebuild
@@ -1741,8 +1835,8 @@ class Output(object):
             labels = self.timeIndex[indices]
 
             linkIndex = self._linkIndex(link)
-            values = np.atleast_2d(
-                np.vstack(
+            values = atleast_2d(
+                vstack(
                     [
                         output.get_link_result(self._handle, idx, linkIndex)
                         for idx in indices
@@ -1753,9 +1847,9 @@ class Output(object):
         if not asframe:
             return values
 
-        dfIndex = pd.Index(labels, name=label)
+        dfIndex = Index(labels, name=label)
 
-        return pd.DataFrame(
+        return DataFrame(
             values, index=dfIndex, columns=list(self.link_attributes.keys())
         )
 
@@ -1764,7 +1858,7 @@ class Output(object):
         self,
         time: Union[str, int, datetime],
         asframe=True,
-    ) -> Union[pd.DataFrame, np.ndarray]:
+    ) -> Union[DataFrame, ndarray]:
         """For a given time, get all system attributes.
 
         Parameters
@@ -1784,14 +1878,14 @@ class Output(object):
 
         timeIndex = self._time2step([time])[0]
 
-        values = np.asarray(output.get_system_result(self._handle, timeIndex, 0))
+        values = asarray(output.get_system_result(self._handle, timeIndex, 0))
 
         if not asframe:
             return values
 
-        dfIndex = pd.Index(self.system_attributes, name="attribute")
+        dfIndex = Index(self.system_attributes, name="attribute")
 
-        return pd.DataFrame(values, index=dfIndex, columns=["Result"])
+        return DataFrame(values, index=dfIndex, columns=["Result"])
 
     def getStructure(self, link, node):
         """

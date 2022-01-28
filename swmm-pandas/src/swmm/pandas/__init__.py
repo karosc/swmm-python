@@ -3,3 +3,6 @@
 __version__ = "0.1.0"
 
 from swmm.pandas.output import Output
+from swmm.pandas.report import Report
+
+from swmm.pandas.constants import test_inp_path, test_out_path, test_rpt_path

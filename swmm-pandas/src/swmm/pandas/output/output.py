@@ -120,7 +120,7 @@ class Output(object):
             list(shared_enum.SubcatchAttribute.__members__.keys())[:-1],
             start=0,
         )
-        """Subcatchment attribute enumeration: By default has 
+        """Subcatchment attribute enumeration: By default has
 
         'rainfall',
         'snow_depth',
@@ -130,7 +130,6 @@ class Output(object):
         'gw_outflow_rate',
         'gw_table_elev',
         'soil_moisture'
-        
         """
 
         # need copies of enumes to extend them for pollutants
@@ -147,34 +146,33 @@ class Output(object):
             list(shared_enum.NodeAttribute.__members__.keys())[:-1],
             start=0,
         )
-        """Node attribute enumeration: By default has 
-        
+        """Node attribute enumeration: By default has
+
         'invert_depth',
         'hydraulic_head',
         'ponded_volume',
         'lateral_inflow',
         'total_inflow',
         'flooding_losses'
-            
         """
         self.link_attributes = Enum(
             "link_attributes",
             list(shared_enum.LinkAttribute.__members__.keys())[:-1],
             start=0,
         )
-        """Link attribute enumeration: By default has 
-        
+        """Link attribute enumeration: By default has
+
         'flow_rate',
         'flow_depth',
         'flow_velocity',
         'flow_volume',
         'capacity',
-            
+
         """
 
         self.system_attributes = shared_enum.SystemAttribute
-        """System attribute enumeration: By default has 
-        
+        """System attribute enumeration: By default has
+
         'air_temp',
         'rainfall',
         'snow_depth',
@@ -190,7 +188,7 @@ class Output(object):
         'volume_stored',
         'evap_rate',
         'ptnl_evap_rate'
-            
+
         """
 
     @staticmethod

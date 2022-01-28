@@ -1,10 +1,8 @@
 import os
-from sqlite3 import Timestamp
-
 import pytest
 from swmm.pandas import Report
 from pandas import Timedelta, Timestamp, DataFrame
-from numpy import allclose, all, array, nan
+from numpy import allclose, all, array, nan, float64
 from swmm.pandas import test_rpt_path
 
 
@@ -126,28 +124,6 @@ def test_flow_routing_continuity(rptfile):
     assert allclose(test, reference, equal_nan=True)
 
 
-def test_flow_routing_continuity(rptfile):
-    reference = array(
-        [
-            [1.787, 0.582],
-            [5.487, 1.788],
-            [0.277, 0.09],
-            [0.0, 0.0],
-            [0.0, 0.0],
-            [6.977, 2.274],
-            [0.529, 0.172],
-            [0.0, 0.0],
-            [0.0, 0.0],
-            [0.0, 0.0],
-            [0.055, 0.018],
-            [-0.158, nan],
-        ]
-    )
-
-    test = rptfile.flow_routing_continuity
-    assert allclose(test, reference, equal_nan=True)
-
-
 def test_quality_routing_continuity(rptfile):
     reference = array(
         [
@@ -222,134 +198,286 @@ def test_washoff_summary(rptfile):
 
 
 def test_node_depth_summary(rptfile):
-    reference = array(
-        [
-            ["JUNCTION", 0.75, 10.25, 11.75, Timedelta("0 days 12:30:00"), 10.25],
-            ["JUNCTION", 1.61, 4.39, 3.35, Timedelta("0 days 12:30:00"), 4.39],
-            ["JUNCTION", 3.74, 13.49, 10.02, Timedelta("0 days 13:44:00"), 13.49],
-            ["JUNCTION", 5.1, 21.71, 16.46, Timedelta("0 days 12:45:00"), 21.71],
-            ["JUNCTION", 4.66, 15.03, 8.53, Timedelta("0 days 13:14:00"), 15.03],
-            ["JUNCTION", 1.14, 1.66, 1.66, Timedelta("0 days 11:40:00"), 1.65],
-            ["OUTFALL", 0.7, 0.95, 1.05, Timedelta("0 days 11:40:00"), 0.95],
-            ["OUTFALL", 0.0, 0.0, -1.04, Timedelta("0 days 00:00:00"), 0.0],
-            ["STORAGE", 7.5, 21.75, 6.5, Timedelta("0 days 12:24:00"), 21.75],
-        ],
-        dtype=object,
+    reference = DataFrame(
+        {
+            "Type": {
+                "JUNC1": "JUNCTION",
+                "JUNC2": "JUNCTION",
+                "JUNC3": "JUNCTION",
+                "JUNC4": "JUNCTION",
+                "JUNC5": "JUNCTION",
+                "JUNC6": "JUNCTION",
+                "OUT1": "OUTFALL",
+                "OUT2": "OUTFALL",
+                "STOR1": "STORAGE",
+            },
+            "Average_Depth_Feet": {
+                "JUNC1": 0.75,
+                "JUNC2": 1.61,
+                "JUNC3": 3.74,
+                "JUNC4": 5.1,
+                "JUNC5": 4.66,
+                "JUNC6": 1.14,
+                "OUT1": 0.7,
+                "OUT2": 0.0,
+                "STOR1": 7.5,
+            },
+            "Maximum_Depth_Feet": {
+                "JUNC1": 10.25,
+                "JUNC2": 4.39,
+                "JUNC3": 13.49,
+                "JUNC4": 21.71,
+                "JUNC5": 15.03,
+                "JUNC6": 1.66,
+                "OUT1": 0.95,
+                "OUT2": 0.0,
+                "STOR1": 21.75,
+            },
+            "Maximum_HGL_Feet": {
+                "JUNC1": 11.75,
+                "JUNC2": 3.35,
+                "JUNC3": 10.02,
+                "JUNC4": 16.46,
+                "JUNC5": 8.53,
+                "JUNC6": 1.66,
+                "OUT1": 1.05,
+                "OUT2": -1.04,
+                "STOR1": 6.5,
+            },
+            "Time_of_Max": {
+                "JUNC1": Timedelta("0 days 12:30:00"),
+                "JUNC2": Timedelta("0 days 12:30:00"),
+                "JUNC3": Timedelta("0 days 13:44:00"),
+                "JUNC4": Timedelta("0 days 12:45:00"),
+                "JUNC5": Timedelta("0 days 13:14:00"),
+                "JUNC6": Timedelta("0 days 11:40:00"),
+                "OUT1": Timedelta("0 days 11:40:00"),
+                "OUT2": Timedelta("0 days 00:00:00"),
+                "STOR1": Timedelta("0 days 12:24:00"),
+            },
+            "Reported_Max_Depth_Feet": {
+                "JUNC1": 10.25,
+                "JUNC2": 4.39,
+                "JUNC3": 13.49,
+                "JUNC4": 21.71,
+                "JUNC5": 15.03,
+                "JUNC6": 1.65,
+                "OUT1": 0.95,
+                "OUT2": 0.0,
+                "STOR1": 21.75,
+            },
+        }
     )
 
     test = rptfile.node_depth_summary
-    assert all(test == reference)
+    for col in test:
+        if test[col].dtype == float64:
+            assert allclose(test[col], reference[col])
+        else:
+            assert all(test[col] == reference[col])
 
 
 def test_node_inflow_summary(rptfile):
-    reference = array(
-        [
-            ["JUNCTION", 2.96, 2.96, Timedelta("0 days 12:30:00"), 0.102, 0.102, 0.461],
-            [
-                "JUNCTION",
-                11.42,
-                16.41,
-                Timedelta("0 days 12:30:00"),
-                0.545,
-                0.857,
-                0.5529999999999999,
-            ],
-            ["JUNCTION", 0.0, 5.0, Timedelta("0 days 12:41:00"), 0.0, 0.502, 1.54],
-            [
-                "JUNCTION",
-                33.53,
-                33.53,
-                Timedelta("0 days 12:30:00"),
-                1.81,
-                2.1,
-                0.013000000000000001,
-            ],
-            ["JUNCTION", 0.0, 12.32, Timedelta("0 days 11:51:00"), 0.0, 1.87, 0.405],
-            ["JUNCTION", 0.0, 5.8, Timedelta("0 days 11:40:00"), 0.0, 1.7, 0.198],
-            ["OUTFALL", 0.0, 5.8, Timedelta("0 days 11:40:00"), 0.0, 1.7, 0.0],
-            [
-                "OUTFALL",
-                0.0,
-                16.39,
-                Timedelta("0 days 12:30:00"),
-                0.0,
-                0.5760000000000001,
-                0.0,
-            ],
-            [
-                "STORAGE",
-                0.0,
-                12.32,
-                Timedelta("0 days 11:51:00"),
-                0.0,
-                1.86,
-                -0.8909999999999999,
-            ],
-        ],
-        dtype=object,
+    reference = DataFrame(
+        {
+            "Type": {
+                "JUNC1": "JUNCTION",
+                "JUNC2": "JUNCTION",
+                "JUNC3": "JUNCTION",
+                "JUNC4": "JUNCTION",
+                "JUNC5": "JUNCTION",
+                "JUNC6": "JUNCTION",
+                "OUT1": "OUTFALL",
+                "OUT2": "OUTFALL",
+                "STOR1": "STORAGE",
+            },
+            "Maximum_Lateral_Inflow_CFS": {
+                "JUNC1": 2.96,
+                "JUNC2": 11.42,
+                "JUNC3": 0.0,
+                "JUNC4": 33.53,
+                "JUNC5": 0.0,
+                "JUNC6": 0.0,
+                "OUT1": 0.0,
+                "OUT2": 0.0,
+                "STOR1": 0.0,
+            },
+            "Maximum_Total_Inflow_CFS": {
+                "JUNC1": 2.96,
+                "JUNC2": 16.41,
+                "JUNC3": 5.0,
+                "JUNC4": 33.53,
+                "JUNC5": 12.32,
+                "JUNC6": 5.8,
+                "OUT1": 5.8,
+                "OUT2": 16.39,
+                "STOR1": 12.32,
+            },
+            "Time_of_Max": {
+                "JUNC1": Timedelta("0 days 12:30:00"),
+                "JUNC2": Timedelta("0 days 12:30:00"),
+                "JUNC3": Timedelta("0 days 12:41:00"),
+                "JUNC4": Timedelta("0 days 12:30:00"),
+                "JUNC5": Timedelta("0 days 11:51:00"),
+                "JUNC6": Timedelta("0 days 11:40:00"),
+                "OUT1": Timedelta("0 days 11:40:00"),
+                "OUT2": Timedelta("0 days 12:30:00"),
+                "STOR1": Timedelta("0 days 11:51:00"),
+            },
+            "Lateral_Inflow_Volume_10^6_gal": {
+                "JUNC1": 0.102,
+                "JUNC2": 0.545,
+                "JUNC3": 0.0,
+                "JUNC4": 1.81,
+                "JUNC5": 0.0,
+                "JUNC6": 0.0,
+                "OUT1": 0.0,
+                "OUT2": 0.0,
+                "STOR1": 0.0,
+            },
+            "Total_Inflow_Volume_10^6_gal": {
+                "JUNC1": 0.102,
+                "JUNC2": 0.857,
+                "JUNC3": 0.502,
+                "JUNC4": 2.1,
+                "JUNC5": 1.87,
+                "JUNC6": 1.7,
+                "OUT1": 1.7,
+                "OUT2": 0.5760000000000001,
+                "STOR1": 1.86,
+            },
+            "Flow_Balance_Error_Percent": {
+                "JUNC1": 0.461,
+                "JUNC2": 0.5529999999999999,
+                "JUNC3": 1.54,
+                "JUNC4": 0.013000000000000001,
+                "JUNC5": 0.405,
+                "JUNC6": 0.198,
+                "OUT1": 0.0,
+                "OUT2": 0.0,
+                "STOR1": -0.8909999999999999,
+            },
+        }
     )
-
     test = rptfile.node_inflow_summary
-    assert all(test == reference)
+    for col in test:
+        if test[col].dtype == float64:
+            assert allclose(test[col], reference[col])
+        else:
+            assert all(test[col] == reference[col])
 
 
 def test_node_surcharge_summary(rptfile):
-    reference = array(
-        [
-            ["JUNCTION", 1.49, 9.251, 0.0],
-            ["JUNCTION", 4.15, 11.99, 0.0],
-            ["JUNCTION", 4.48, 19.712, 0.0],
-            ["JUNCTION", 4.78, 13.026, 0.0],
-            ["JUNCTION", 8.01, 0.659, 7.341],
-        ],
-        dtype=object,
+    reference = DataFrame(
+        {
+            "Type": {
+                "JUNC1": "JUNCTION",
+                "JUNC3": "JUNCTION",
+                "JUNC4": "JUNCTION",
+                "JUNC5": "JUNCTION",
+                "JUNC6": "JUNCTION",
+            },
+            "Hours_Surcharged": {
+                "JUNC1": 1.49,
+                "JUNC3": 4.15,
+                "JUNC4": 4.48,
+                "JUNC5": 4.78,
+                "JUNC6": 8.01,
+            },
+            "Max. Height_Above_Crown_Feet": {
+                "JUNC1": 9.251,
+                "JUNC3": 11.99,
+                "JUNC4": 19.712,
+                "JUNC5": 13.026,
+                "JUNC6": 0.659,
+            },
+            "Min. Depth_Below_Rim_Feet": {
+                "JUNC1": 0.0,
+                "JUNC3": 0.0,
+                "JUNC4": 0.0,
+                "JUNC5": 0.0,
+                "JUNC6": 7.341,
+            },
+        }
     )
 
     test = rptfile.node_surchage_summary
-    assert all(test == reference)
+    for col in test:
+        if test[col].dtype == float64:
+            assert allclose(test[col], reference[col])
+        else:
+            assert all(test[col] == reference[col])
 
 
 def test_node_flooding_summary(rptfile):
-    reference = array(
-        [
-            [0.07, 0.87, Timedelta("0 days 11:49:00"), 0.0, 0.001],
-            [3.19, 2.8, Timedelta("0 days 12:38:00"), 0.081, 1.99],
-            [3.1, 18.33, Timedelta("0 days 12:15:00"), 0.318, 7.912000000000001],
-            [
-                3.08,
-                4.37,
-                Timedelta("0 days 12:24:00"),
-                0.07400000000000001,
-                1.8259999999999998,
-            ],
-            [2.47, 4.21, Timedelta("0 days 13:14:00"), 0.172, 0.0],
-        ],
-        dtype=object,
+    reference = DataFrame(
+        {
+            "Hours_Flooded": {
+                "JUNC1": 0.07,
+                "JUNC3": 3.19,
+                "JUNC4": 3.1,
+                "JUNC5": 3.08,
+                "STOR1": 2.47,
+            },
+            "Maximum_Rate_CFS": {
+                "JUNC1": 0.87,
+                "JUNC3": 2.8,
+                "JUNC4": 18.33,
+                "JUNC5": 4.37,
+                "STOR1": 4.21,
+            },
+            "Time_of_Max": {
+                "JUNC1": Timedelta("0 days 11:49:00"),
+                "JUNC3": Timedelta("0 days 12:38:00"),
+                "JUNC4": Timedelta("0 days 12:15:00"),
+                "JUNC5": Timedelta("0 days 12:24:00"),
+                "STOR1": Timedelta("0 days 13:14:00"),
+            },
+            "Total_Flood_Volume_10^6_gal": {
+                "JUNC1": 0.0,
+                "JUNC3": 0.081,
+                "JUNC4": 0.318,
+                "JUNC5": 0.07400000000000001,
+                "STOR1": 0.172,
+            },
+            "Maximum_Ponded_Depth_Feet": {
+                "JUNC1": 0.001,
+                "JUNC3": 1.99,
+                "JUNC4": 7.912000000000001,
+                "JUNC5": 1.8259999999999998,
+                "STOR1": 0.0,
+            },
+        }
     )
 
     test = rptfile.node_flooding_summary
-    assert all(test == reference)
+    for col in test:
+        if test[col].dtype == float64:
+            assert allclose(test[col], reference[col])
+        else:
+            assert all(test[col] == reference[col])
 
 
 def test_storage_volume_summary(rptfile):
-    reference = array(
-        [
-            [
-                3.0980000000000003,
-                34,
-                0,
-                0,
-                8.982999999999999,
-                100,
-                Timedelta("0 days 12:24:00"),
-                5.8,
-            ]
-        ],
-        dtype=object,
+    reference = DataFrame(
+        {
+            "Average_Volume_1000_ft3": {"STOR1": 3.0980000000000003},
+            "Avg_Pcnt_Full": {"STOR1": 34},
+            "Evap_Pcnt_Loss": {"STOR1": 0},
+            "Exfil_Pcnt_Loss": {"STOR1": 0},
+            "Maximum_Volume_1000_ft3": {"STOR1": 8.982999999999999},
+            "Max_Pcnt_Full": {"STOR1": 100},
+            "Time_of_Max": {"STOR1": Timedelta("0 days 12:24:00")},
+            "Maximum_Outflow_CFS": {"STOR1": 5.8},
+        }
     )
 
     test = rptfile.storage_volume_summary
-    assert all(test == reference)
+    for col in test:
+        if test[col].dtype == float64:
+            assert allclose(test[col], reference[col])
+        else:
+            assert all(test[col] == reference[col])
 
 
 def test_outfall_loading_summary(rptfile):
@@ -382,28 +510,78 @@ def test_outfall_loading_summary(rptfile):
 
 
 def test_link_flow_summary(rptfile):
-    reference = array(
-        [
-            ["CONDUIT", 2.93, Timedelta("0 days 12:30:00"), 3.74, 1.92, 1.0],
-            ["CONDUIT", 2.48, Timedelta("0 days 13:45:00"), 3.23, 1.86, 1.0],
-            ["CONDUIT", 5.0, Timedelta("0 days 12:41:00"), 4.0, 2.42, 1.0],
-            ["CONDUIT", 12.32, Timedelta("0 days 11:51:00"), 4.87, 2.73, 1.0],
-            ["CONDUIT", 12.32, Timedelta("0 days 11:51:00"), 7.84, 17.51, 1.0],
-            ["CONDUIT", 5.8, Timedelta("0 days 11:40:00"), 7.44, 2.41, 0.97],
-            ["PUMP", 5.8, Timedelta("0 days 11:40:00"), 1.0, nan, nan],
-            ["WEIR", 16.39, Timedelta("0 days 12:30:00"), 0.43, nan, nan],
-        ],
-        dtype=object,
+    reference = DataFrame(
+        {
+            "Type": {
+                "COND1": "CONDUIT",
+                "COND2": "CONDUIT",
+                "COND3": "CONDUIT",
+                "COND4": "CONDUIT",
+                "COND5": "CONDUIT",
+                "COND6": "CONDUIT",
+                "PUMP1": "PUMP",
+                "WR1": "WEIR",
+            },
+            "Maximum_Flow_CFS": {
+                "COND1": 2.93,
+                "COND2": 2.48,
+                "COND3": 5.0,
+                "COND4": 12.32,
+                "COND5": 12.32,
+                "COND6": 5.8,
+                "PUMP1": 5.8,
+                "WR1": 16.39,
+            },
+            "Time_of_Max": {
+                "COND1": Timedelta("0 days 12:30:00"),
+                "COND2": Timedelta("0 days 13:45:00"),
+                "COND3": Timedelta("0 days 12:41:00"),
+                "COND4": Timedelta("0 days 11:51:00"),
+                "COND5": Timedelta("0 days 11:51:00"),
+                "COND6": Timedelta("0 days 11:40:00"),
+                "PUMP1": Timedelta("0 days 11:40:00"),
+                "WR1": Timedelta("0 days 12:30:00"),
+            },
+            "Maximum_Veloc_ft/sec": {
+                "COND1": 3.74,
+                "COND2": 3.23,
+                "COND3": 4.0,
+                "COND4": 4.87,
+                "COND5": 7.84,
+                "COND6": 7.44,
+                "PUMP1": 1.0,
+                "WR1": 0.43,
+            },
+            "Max/_Full_Flow": {
+                "COND1": 1.92,
+                "COND2": 1.86,
+                "COND3": 2.42,
+                "COND4": 2.73,
+                "COND5": 17.51,
+                "COND6": 2.41,
+                "PUMP1": nan,
+                "WR1": nan,
+            },
+            "Max/_Full_Depth": {
+                "COND1": 1.0,
+                "COND2": 1.0,
+                "COND3": 1.0,
+                "COND4": 1.0,
+                "COND5": 1.0,
+                "COND6": 0.97,
+                "PUMP1": nan,
+                "WR1": nan,
+            },
+        }
     )
 
-    test = rptfile.link_flow_summary.to_numpy()
+    test = rptfile.link_flow_summary
 
-    assert all(reference[:, [0, 2]] == test[:, [0, 2]])
-    assert allclose(
-        reference[:, [1, 3, 4, 5]].astype(float),
-        test[:, [1, 3, 4, 5]].astype(float),
-        equal_nan=True,
-    )
+    for col in test:
+        if test[col].dtype == float64:
+            assert allclose(test[col], reference[col], equal_nan=True)
+        else:
+            assert all(test[col] == reference[col])
 
 
 def test_flow_classification_summary(rptfile):

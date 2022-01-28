@@ -7,23 +7,20 @@ from datetime import datetime
 import numpy as np
 import pandas as pd
 import pytest
-from numpy.core.numeric import allclose
 
-from swmm.pandas import Output
-from swmm.pandas.output.enums import subcatch_attribute
-
-this_dir, this_filename = os.path.split(__file__)
-outPath = os.path.join(this_dir, "Model.out")
+from swmm.pandas import Output, test_out_path
+from swmm.toolkit.shared_enum import SubcatchAttribute
 
 
 @pytest.fixture(scope="module")
 def outfile():
-    out = Output(outPath)
+
+    out = Output(test_out_path)
     yield out
     out._close()
 
 
-def testOpenWarning(outfile):
+def test_open_warning(outfile):
     """Test outfile has a pollutant named rainfall. This should raise warning"""
     with pytest.warns(UserWarning):
         outfile._open()
@@ -67,7 +64,7 @@ def test_node_series(outfile):
     df = outfile.node_series(["JUNC3", "JUNC4"], ["invert_depth", "sewage"])
     ts = pd.Timestamp("1/1/1900 01:05")
     assert type(df) == pd.DataFrame
-    refarray = np.array([[0.632486, 81.739952], [0.840065, 82.240310]])
+    refarray = np.array([[0.632757, 82.557610], [0.840164, 82.403465]])
     assert np.allclose(
         df.loc[[(ts, "JUNC3"), (ts, "JUNC4")], :].to_numpy(), refarray, atol=0.000001
     )
@@ -81,7 +78,7 @@ def test_link_series(outfile):
     df = outfile.link_series("PUMP1", ["flow_rate", "groundwater"])
     ts = pd.Timestamp("1/1/1900 01:05")
     assert type(df) == pd.DataFrame
-    refarray = np.array([1.038260, 10.866543])
+    refarray = np.array([1.03671658, 10.87113953])
     assert np.allclose(df.loc[ts, :].to_numpy(), refarray, atol=0.000001)
 
 
@@ -91,7 +88,7 @@ def test_system_series(outfile):
     df = outfile.system_series(["gw_inflow", "flood_losses"])
     ts = pd.Timestamp("1/1/1900 13:30")
     assert type(df) == pd.DataFrame
-    refarray = np.array([0.154941, 3.971512])
+    refarray = np.array([0.15494138, 3.97151256])
     assert np.allclose(df.loc[ts].to_numpy(), refarray, atol=0.000001)
 
 
@@ -129,15 +126,15 @@ def test_node_attribute(outfile):
     assert df.shape == (9, 9)
     refarray = np.array(
         [
-            13.421694,
-            9.951694,
-            10073.076200,
-            0.000000,
-            3.270415,
-            0.803252,
-            0.528808,
-            95.420525,
-            3.958632,
+            13.39598274,
+            9.92598152,
+            9938.31542969,
+            0.0,
+            3.40221405,
+            0.94061023,
+            0.51279306,
+            95.54773712,
+            3.84922433,
         ]
     )
     assert np.allclose(df.loc["JUNC3"].to_numpy(), refarray, atol=0.000001)
@@ -151,14 +148,14 @@ def test_link_attribute(outfile):
     assert df.shape == (8, 8)
     refarray = np.array(
         [
-            8.769582,
-            1.500000,
-            3.470112,
-            1851.105590,
-            1.000000,
-            0.861774,
-            92.784477,
-            6.229438,
+            8.96449947,
+            1.5,
+            3.54724121,
+            1851.10754395,
+            1.0,
+            0.81769407,
+            93.12129211,
+            5.93402863,
         ]
     )
     assert np.allclose(df.loc["COND4"].to_numpy(), refarray, atol=0.000001)
@@ -209,26 +206,26 @@ def test_node_result(outfile):
     refarray = np.array(
         [
             [
-                13.421694,
-                9.951694,
-                10073.076172,
-                0.000000,
-                3.270415,
-                0.803252,
-                0.528808,
-                95.420525,
-                3.958632,
+                13.39598274,
+                9.92598152,
+                9938.31542969,
+                0.0,
+                3.40221405,
+                0.94061023,
+                0.51279306,
+                95.54773712,
+                3.84922433,
             ],
             [
-                2.997494,
-                -0.472506,
-                0.000000,
-                0.000000,
-                1.357396,
-                0.000000,
-                5.058118,
-                75.098473,
-                19.795525,
+                3.59898233,
+                0.12898226,
+                0.0,
+                0.0,
+                1.1946373,
+                0.0,
+                4.38057995,
+                76.85120392,
+                18.56258392,
             ],
         ]
     )
@@ -244,24 +241,24 @@ def test_link_result(outfile):
     refarray = np.array(
         [
             [
-                8.769582,
-                1.500000,
-                3.470112,
-                1851.105591,
-                1.000000,
-                0.861774,
-                92.784477,
-                6.229438,
+                8.96449947,
+                1.5,
+                3.54724121,
+                1851.10754395,
+                1.0,
+                0.81769407,
+                93.12129211,
+                5.93402863,
             ],
             [
-                -2.467724,
-                0.750000,
-                -3.210221,
-                460.856079,
-                1.000000,
-                0.509358,
-                95.575531,
-                3.825584,
+                -2.46341562,
+                0.75,
+                -3.20461726,
+                460.85583496,
+                1.0,
+                0.4940097,
+                95.69831848,
+                3.72042918,
             ],
         ]
     )
@@ -276,21 +273,21 @@ def test_system_result(outfile):
     assert df.shape == (15, 1)
     refarray = np.array(
         [
-            70.000000,
-            0.156000,
-            0.000000,
-            0.255805,
-            3.695478,
-            1.00800,
-            0.154941,
-            0.000000,
-            0.000000,
-            4.85842,
-            3.971513,
-            9.427255,
-            56656.34375,
-            0.000000,
-            0.000000,
+            70.0,
+            0.15599999,
+            0.0,
+            0.2558046,
+            3.69547844,
+            1.00800002,
+            0.15494138,
+            0.0,
+            0.0,
+            4.8584199,
+            3.97151256,
+            9.42725468,
+            56644.5625,
+            0.0,
+            0.0,
         ]
     )
 
@@ -302,26 +299,26 @@ def test_system_result(outfile):
     [
         (
             "rainfall",
-            subcatch_attribute,
+            SubcatchAttribute,
             ["rainfall"],
-            [subcatch_attribute["rainfall"]],
+            [SubcatchAttribute["RAINFALL"]],
             "outfile",
         ),
         (
             ["rainfall", 3],
-            subcatch_attribute,
+            SubcatchAttribute,
             ["rainfall", "infil_loss"],
-            [subcatch_attribute["rainfall"], subcatch_attribute["infil_loss"]],
+            [SubcatchAttribute["RAINFALL"], SubcatchAttribute["INFIL_LOSS"]],
             "outfile",
         ),
         (
-            ["rainfall", 3, subcatch_attribute["soil_moisture"]],
-            subcatch_attribute,
+            ["rainfall", 3, SubcatchAttribute["SOIL_MOISTURE"]],
+            SubcatchAttribute,
             ["rainfall", "infil_loss", "soil_moisture"],
             [
-                subcatch_attribute["rainfall"],
-                subcatch_attribute["infil_loss"],
-                subcatch_attribute["soil_moisture"],
+                SubcatchAttribute["RAINFALL"],
+                SubcatchAttribute["INFIL_LOSS"],
+                SubcatchAttribute["SOIL_MOISTURE"],
             ],
             "outfile",
         ),

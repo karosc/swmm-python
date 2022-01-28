@@ -167,8 +167,8 @@ Sewage           MG/L   0          0          0          0          NO         *
 [DWF]
 ;;Node           Constituent      Baseline   Patterns  
 ;;-------------- ---------------- ---------- ----------
-JUNC2            FLOW             0.2        "HOURLY" ""
-JUNC4            FLOW             0.7        "HOURLY" ""
+JUNC2            FLOW             0.2        "HOURLY"
+JUNC4            FLOW             0.7        "HOURLY"
 
 [CURVES]
 ;;Name           Type       X-Value    Y-Value   
@@ -532,6 +532,9 @@ HOURLY                      1.100000 1.140000 1.120000 1.060000 1.020000 0.80000
 
 [REPORT]
 ;;Reporting Options
+INPUT      NO
+CONTROLS   YES
+AVERAGES   YES
 SUBCATCHMENTS ALL
 NODES ALL
 LINKS ALL

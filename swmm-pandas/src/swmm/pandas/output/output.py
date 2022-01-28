@@ -1053,7 +1053,7 @@ class Output(object):
             )
             indexArrays = [dtIndex]
             names = ["datetime"]
-            cols = ["Result"]
+            cols = ["result"]
             if len(elementArray) > 1:
                 indexArrays.append(
                     asarray(elementArray).repeat(
@@ -1212,7 +1212,7 @@ class Output(object):
         Pull a long-form dataframe of all catchments and attributes
 
         >>> out.subcatch_series(out.subcatchments, out.subcatch_attributes, columns=None)
-                                               Result
+                                               result
         datetime            element attribute
         1900-01-01 00:05:00 SUB1    rainfall     0.03
         1900-01-01 00:10:00 SUB1    rainfall     0.03
@@ -1402,7 +1402,7 @@ class Output(object):
         Pull a long-form dataframe of all nodes and attributes
 
         >>> out.node_series('JUNC2', out.node_attributes, columns=None)
-                                                    Result
+                                                    result
         datetime            element attribute
         1900-01-01 00:05:00 JUNC1   invert_depth   0.002143
         1900-01-01 00:10:00 JUNC1   invert_depth   0.010006
@@ -1809,7 +1809,7 @@ class Output(object):
 
         Examples
         ---------
-        Pull rainfall at start of simulation
+        Pull rainfall for all catchments at start of simulation
 
         >>> from swmm.pandas import Output,test_out_path
         >>> out = Output(test_out_path)
@@ -1819,17 +1819,6 @@ class Output(object):
             SUB1              0.03
             SUB2              0.03
             SUB3              0.03
-
-        Pull rainfall at middle of simulation
-
-        >>> out.subcatch_attribute(out.period/2,'rainfall')
-                      rainfall
-        subcatchment
-        SUB1             1.212
-        SUB2             1.212
-        SUB3             1.212
-
-
         """
 
         attributeArray, attributeIndexArray = self._validateAttribute(
@@ -1894,6 +1883,25 @@ class Output(object):
         Union[pd.DataFrame, np.ndarray]
             A DataFrame or ndarray of attribute values in each column for requested simulation time.
 
+        Examples
+        ---------
+        Pull all attributes from middle of simulation
+
+        >>> from swmm.pandas import Output,test_out_path
+        >>> out = Output(test_out_path)
+        >>> out.node_attribute(out.period/2)
+                   invert_depth  hydraulic_head  ponded_volume  ...  groundwater  pol_rainfall    sewage
+            node                                                ...
+            JUNC1      8.677408       10.177408       0.000000  ...     0.260937     99.739067  0.000000
+            JUNC2      4.286304        3.246305       0.000000  ...     0.366218     96.767433  2.475719
+            JUNC3     11.506939        8.036940      35.862713  ...     0.615687     94.522049  4.862284
+            JUNC4     14.936149        9.686150    6107.279785  ...     0.381425     96.532028  3.086555
+            JUNC5     11.190232        4.690233       0.000000  ...     0.443388     95.959351  3.597255
+            JUNC6      1.650765        1.650765       0.000000  ...     0.963940     91.113075  7.922997
+            OUT1       0.946313        1.046313       0.000000  ...     0.969624     91.060143  7.970241
+            OUT2       0.000000       -1.040001       0.000000  ...     0.367271     96.756134  2.479369
+            STOR1     18.282972        3.032968    7550.865723  ...     0.961457     91.136200  7.902364
+            [9 rows x 9 columns]
         """
         attributeArray, attributeIndexArray = self._validateAttribute(
             attribute, self.node_attributes
@@ -1956,6 +1964,24 @@ class Output(object):
         pd.DataFrame
             A DataFrame of attribute values in each column for requested simulation time.
 
+        Examples
+        ---------
+        Pull depth. flooding, and total inflow attributes from end of simulation
+
+        >>> from swmm.pandas import Output,test_out_path
+        >>> out = Output(test_out_path)
+        >>> out.link_attribute(out.period/2)
+                   invert_depth  flooding_losses  total_inflow
+            node
+            JUNC1      8.677408         0.000000      2.665294
+            JUNC2      4.286304         0.000000     14.571551
+            JUNC3     11.506939         0.341040      2.319820
+            JUNC4     14.936149        16.137648     27.521870
+            JUNC5     11.190232         0.000000      9.051201
+            JUNC6      1.650765         0.000000      5.799996
+            OUT1       0.946313         0.000000      5.799996
+            OUT2       0.000000         0.000000     14.574173
+            STOR1     18.282972         0.000000      9.048394
         """
         attributeArray, attributeIndexArray = self._validateAttribute(
             attribute, self.link_attributes
@@ -2016,6 +2042,31 @@ class Output(object):
         Union[pd.DataFrame,np.ndarray]
             A DataFrame of attribute values in each column for requested simulation time.
 
+        Examples
+        ---------
+
+        Pull all system attributes for the 10th time step
+
+        >>> from swmm.pandas import Output,test_out_path
+        >>> out = Output(test_out_path)
+        >>> out.system_attribute(10)
+                                       result
+            attribute
+            air_temp                70.000000
+            rainfall                 0.030000
+            snow_depth               0.000000
+            evap_infil_loss          0.015042
+            runoff_flow              0.066304
+            dry_weather_inflow       0.801000
+            gw_inflow                0.101737
+            rdii_inflow              0.000000
+            direct_inflow            0.000000
+            total_lateral_inflow     0.969041
+            flood_losses             0.000000
+            outfall_flows            0.944981
+            volume_stored         1731.835938
+            evap_rate                0.000000
+            ptnl_evap_rate           0.000000
         """
 
         attributeArray, attributeIndexArray = self._validateAttribute(
@@ -2067,6 +2118,32 @@ class Output(object):
         Union[pd.DataFrame,np.ndarray]
             A DataFrame or ndarray of all attribute values subcatchment(s) at given time(s).
 
+        Examples
+        ---------
+
+        Pull all attributes at start, middle, and end time steps for a single catchment
+
+        >>> from swmm.pandas import Output,test_out_path
+        >>> out = Output(test_out_path)
+        >>> out.subcatch_result("SUB1",[0,out.period/2,out.period-1])
+                                 rainfall  snow_depth  evap_loss  infil_loss  ...  soil_moisture  groundwater  pol_rainfall  sewage
+            datetime                                                          ...
+            1900-01-01 00:05:00     0.030         0.0        0.0    0.020820  ...       0.276035          0.0           0.0     0.0
+            1900-01-01 12:05:00     1.212         0.0        0.0    0.594862  ...       0.281631          0.0         100.0     0.0
+            1900-01-02 00:00:00     0.000         0.0        0.0    0.027270  ...       0.280026          0.0         100.0     0.0
+            [3 rows x 11 columns]
+
+        Pull all attributes for all catchments at the start of the simulation
+
+        >>> from swmm.pandas import Output,test_out_path
+        >>> out = Output(test_out_path)
+        >>> out.subcatch_result(out.subcatchments,'1900-01-01')
+                          rainfall  snow_depth  evap_loss  infil_loss  ...  soil_moisture  groundwater  pol_rainfall  sewage
+            subcatchment                                               ...
+            SUB1              0.03         0.0        0.0    0.020820  ...       0.276035          0.0           0.0     0.0
+            SUB2              0.03         0.0        0.0    0.017824  ...       0.275048          0.0           0.0     0.0
+            SUB3              0.03         0.0        0.0    0.011365  ...       0.279013          0.0           0.0     0.0
+            [3 rows x 11 columns]
         """
 
         if isinstance(subcatchment, arrayish) and isinstance(time, arrayish):
@@ -2139,6 +2216,37 @@ class Output(object):
         Union[pd.DataFrame,np.ndarray]
             A DataFrame or ndarray of all attribute values nodes(s) at given time(s).
 
+        Examples
+        ---------
+
+        Pull all attributes at start, middle, and end time steps for a single node
+
+        >>> from swmm.pandas import Output,test_out_path
+        >>> out = Output(test_out_path)
+        >>> out.node_result("JUNC1",[0,out.period/2,out.period-1])
+                                 invert_depth  hydraulic_head  ponded_volume  lateral_inflow  ...  flooding_losses  groundwater  pol_rainfall  sewage
+            datetime                                                                          ...
+            1900-01-01 00:05:00      0.002143        1.502143            0.0        0.002362  ...              0.0    84.334671      0.000000     0.0
+            1900-01-01 12:05:00      8.677408       10.177408            0.0        2.665294  ...              0.0     0.260937     99.739067     0.0
+            1900-01-02 00:00:00      0.108214        1.608214            0.0        0.037889  ...              0.0    33.929119     66.251686     0.0
+            [3 rows x 9 columns]
+
+        Pull all attributes for all nodes at the start of the simulation
+
+        >>> from swmm.pandas import Output,test_out_path
+        >>> out = Output(test_out_path)
+        >>> out.node_result(out.nodes,'1900-01-01')
+                   invert_depth  hydraulic_head  ponded_volume  lateral_inflow  total_inflow  flooding_losses  groundwater  pol_rainfall     sewage
+            node
+            JUNC1      0.002143        1.502143            0.0        0.002362      0.002362              0.0    84.334671           0.0   0.000000
+            JUNC2      0.334742       -0.705258            0.0        0.185754      0.185785              0.0     3.935642           0.0  95.884094
+            JUNC3      0.000000       -3.470001            0.0        0.000000      0.000000              0.0     0.000000           0.0   0.000000
+            JUNC4      0.530241       -4.719759            0.0        0.657521      0.657521              0.0     5.066027           0.0  94.864769
+            JUNC5      0.090128       -6.409873            0.0        0.000000      0.027627              0.0     2.723724           0.0  82.198524
+            JUNC6      0.000000        0.000000            0.0        0.000000      0.000000              0.0     0.000000           0.0   0.000000
+            OUT1       0.000000        0.100000            0.0        0.000000      0.000000              0.0     0.000000           0.0   0.000000
+            OUT2       0.000000       -1.040000            0.0        0.000000      0.000000              0.0     0.000000           0.0   0.000000
+            STOR1      0.000000      -15.250000            0.0        0.000000      0.000000              0.0     0.000000           0.0   0.000000
         """
         if isinstance(node, arrayish) and isinstance(time, arrayish):
             raise Exception("Can only have multiple of one of node and time")
@@ -2209,6 +2317,35 @@ class Output(object):
         Union[pd.DataFrame,np.ndarray]
             A DataFrame or ndarray of all attribute values link(s) at given time(s).
 
+        Examples
+        ---------
+
+        Pull all attributes at start, middle, and end time steps for a single link
+
+        >>> from swmm.pandas import Output,test_out_path
+        >>> out = Output(test_out_path)
+        >>> out.link_result("COND1",[0,out.period/2,out.period-1])
+                                 flow_rate  flow_depth  flow_velocity  flow_volume  capacity  groundwater  pol_rainfall        sewage
+            datetime
+            1900-01-01 00:05:00   0.000031    0.053857       0.001116    23.910770  0.024351    79.488449      0.000000  0.000000e+00
+            1900-01-01 12:05:00   2.665548    1.000000       3.393882   732.276428  1.000000     0.491514     99.142815  2.742904e-01
+            1900-01-02 00:00:00   0.037800    0.312581       0.180144   212.443344  0.267168    32.083355     67.963829  5.049533e-08
+
+        Pull all attributes for all links at the start of the simulation
+
+        >>> from swmm.pandas import Output,test_out_path
+        >>> out = Output(test_out_path)
+        >>> out.link_result(out.links,'1900-01-01')
+                   flow_rate  flow_depth  flow_velocity  flow_volume  capacity  groundwater  pol_rainfall     sewage
+            link
+            COND1   0.000031    0.053857       0.001116    23.910770  0.024351    79.488449           0.0   0.000000
+            COND2   0.000000    0.000100       0.000000     0.074102  0.000161     0.000000           0.0   0.000000
+            COND3   0.000000    0.000100       0.000000     0.076337  0.000113     0.000000           0.0   0.000000
+            COND4   0.027627    0.038128       0.304938    49.596237  0.026561     3.034879           0.0  86.882553
+            COND5   0.000000    0.000100       0.000000     0.012962  0.000127     0.000000           0.0   0.000000
+            COND6   0.000000    0.000100       0.000000     0.000404  0.000014     0.000000           0.0   0.000000
+            PUMP1   0.000000    0.000000       0.000000     0.000000  0.000000     0.000000           0.0   0.000000
+            WR1     0.000000    0.000000       0.000000     0.000000  1.000000     3.935642           0.0  95.884094
         """
         if isinstance(link, arrayish) and isinstance(time, arrayish):
             raise Exception("Can only have multiple of one of link and time")
@@ -2274,6 +2411,31 @@ class Output(object):
         Union[pd.DataFrame,np.ndarray]
             A DataFrame of attribute values in each row for requested simulation time.
 
+        Examples
+        ---------
+
+        Pull all attributes at start of simulation
+
+        >>> from swmm.pandas import Output,test_out_path
+        >>> out = Output(test_out_path)
+        >>> out.system_result('1900-01-01')
+                                    result
+            attribute
+            air_temp               70.000000
+            rainfall                0.030000
+            snow_depth              0.000000
+            evap_infil_loss         0.013983
+            runoff_flow             0.000000
+            dry_weather_inflow      0.801000
+            gw_inflow               0.101807
+            rdii_inflow             0.000000
+            direct_inflow           0.000000
+            total_lateral_inflow    0.902807
+            flood_losses            0.000000
+            outfall_flows           0.000000
+            volume_stored         168.436996
+            evap_rate               0.000000
+            ptnl_evap_rate          0.000000
         """
 
         timeIndex = self._time2step([time])[0]
@@ -2285,7 +2447,7 @@ class Output(object):
 
         dfIndex = Index(_enum_keys(self.system_attributes), name="attribute")
 
-        return DataFrame(values, index=dfIndex, columns=["Result"])
+        return DataFrame(values, index=dfIndex, columns=["result"])
 
     def getStructure(self, link, node):
         """

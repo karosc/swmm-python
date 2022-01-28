@@ -1,6 +1,9 @@
 import numpy as np
+from aenum import Enum
+from typing import Tuple
 
-arrayish = (list, tuple, set, np.ndarray, type(None))
+arrayishNone = (list, tuple, set, np.ndarray, type(None))
+arrayish = (list, tuple, set, np.ndarray)
 
 
 def elements(path: str) -> dict:
@@ -15,3 +18,14 @@ def elements(path: str) -> dict:
             if len(line) > 0:
                 out[section].append(line)
     return out
+
+
+def _enum_get(enum: Enum, name: str) -> int:
+    try:
+        return enum.__getitem__(name.upper())
+    except KeyError:
+        return None
+
+
+def _enum_keys(enum: Enum) -> Tuple[str]:
+    return tuple(map(lambda x: x.lower(), enum.__members__.keys()))

@@ -1,3 +1,4 @@
+from aenum import EnumMeta
 import os.path
 import warnings
 from datetime import datetime, timedelta
@@ -5,20 +6,11 @@ from functools import wraps
 from typing import Callable, List, NoReturn, Optional, Sequence, Tuple, Union
 
 import numpy as np
-from numpy import (
-    ndarray,
-    concatenate,
-    vstack,
-    stack,
-    tile,
-    asarray,
-    atleast_1d,
-    atleast_2d,
-    datetime64,
-    integer as npint,
-)
 from aenum import Enum, extend_enum
 from julian import from_jd
+from numpy import asarray, atleast_1d, atleast_2d, concatenate, datetime64
+from numpy import integer as npint
+from numpy import ndarray, stack, tile, vstack
 from pandas.core.api import (
     DataFrame,
     DatetimeIndex,
@@ -29,14 +21,8 @@ from pandas.core.api import (
 )
 from swmm.toolkit import output, shared_enum
 
-from swmm.pandas.output.enums import (
-    link_attribute,
-    node_attribute,
-    subcatch_attribute,
-    system_attribute,
-)
 from swmm.pandas.output.structure import Structure
-from swmm.pandas.output.tools import arrayish
+from swmm.pandas.output.tools import arrayish, _enum_get, _enum_keys
 
 
 def output_open_handler(func):
@@ -81,8 +67,6 @@ class Output(object):
             ...     print(out.pollutants)
             ('groundwater', 'pol_rainfall', 'sewage')
 
-
-
         Parameters
         ----------
         binfile : str
@@ -92,30 +76,62 @@ class Output(object):
         -------
 
         """
-        self._binfile = binfile
+
         self._period: int
+        """number of reporting time steps in the """
+
         self._report: int
+        """out file reporting time step in seconds"""
+
         self._start: datetime
+        """start datetime of the output file records"""
+
         self._end: datetime
+        """end datetime of the output file records"""
+
         self._timeIndex: DatetimeIndex
+        """DatetimeIndex to use for output timeseries"""
+
         self._project_size: List[int]
-        self._subcatchments: Tuple[str]
-        self._links: Tuple[str]
-        self._pollutants: Tuple[str]
+        """Array of element count values [nSubcatchments, nNodes, nLinks, nSystems(1), nPollutants]"""
+
+        self._subcatchments: Tuple[str, ...]
+        """Tuple of subcatchment names in output file"""
+
+        self._links: Tuple[str, ...]
+        """Tuple of link names in output file"""
+
+        self._pollutants: Tuple[str, ...]
+        """Tuple of pollutant names in output file"""
+
+        self._handle = None
+
+        self._binfile: str = binfile
+        """path to binary output file"""
 
         self._delete_handle: bool = False
-        self._handle = None
-        self._loaded: bool = False
+        """Indicates if output file was closed correctly"""
 
-        # have to copy attribute dicts since they are edited
-        # to include pollutants when outfile is opened
-        # editing global attributes would break things
-        # if more than one output object was created
-        # from different output files
-        self.subcatch_attributes: dict = subcatch_attribute.copy()
-        self.node_attributes: dict = node_attribute.copy()
-        self.link_attributes: dict = link_attribute.copy()
-        self.system_attributes: dict = system_attribute.copy()
+        self._loaded: bool = False
+        """Indicates if output file was loaded correctly"""
+
+        self.subcatch_attributes = Enum(
+            "subcatch_attributes",
+            list(shared_enum.SubcatchAttribute.__members__.keys())[:-1],
+            start=0,
+        )
+        """Subcatchment attribute enumeration: By default has 
+
+        'rainfall',
+        'snow_depth',
+        'evap_loss',
+        'infil_loss',
+        'runoff_rate',
+        'gw_outflow_rate',
+        'gw_table_elev',
+        'soil_moisture'
+        
+        """
 
         # need copies of enumes to extend them for pollutants
         # basically recreate enums using the keys from shared_enum
@@ -125,21 +141,57 @@ class Output(object):
         # extends global enums, which could break having multiple
         # output objects opened in the same python session if they
         # have different pollutant names
-        self._subcatchAttrEnum = Enum(
-            "SubcatchAttribute",
-            list(shared_enum.SubcatchAttribute.__members__.keys())[:-1],
-            start=0,
-        )
-        self._nodeAttrEnum = Enum(
-            "NodeAttribute",
+
+        self.node_attributes = Enum(
+            "node_attributes",
             list(shared_enum.NodeAttribute.__members__.keys())[:-1],
             start=0,
         )
-        self._linkAttrEnum = Enum(
-            "LinkAttribute",
+        """Node attribute enumeration: By default has 
+        
+        'invert_depth',
+        'hydraulic_head',
+        'ponded_volume',
+        'lateral_inflow',
+        'total_inflow',
+        'flooding_losses'
+            
+        """
+        self.link_attributes = Enum(
+            "link_attributes",
             list(shared_enum.LinkAttribute.__members__.keys())[:-1],
             start=0,
         )
+        """Link attribute enumeration: By default has 
+        
+        'flow_rate',
+        'flow_depth',
+        'flow_velocity',
+        'flow_volume',
+        'capacity',
+            
+        """
+
+        self.system_attributes = shared_enum.SystemAttribute
+        """System attribute enumeration: By default has 
+        
+        'air_temp',
+        'rainfall',
+        'snow_depth',
+        'evap_infil_loss',
+        'runoff_flow',
+        'dry_weather_inflow',
+        'gw_inflow',
+        'rdii_inflow',
+        'direct_inflow',
+        'total_lateral_inflow',
+        'flood_losses',
+        'outfall_flows',
+        'volume_stored',
+        'evap_rate',
+        'ptnl_evap_rate'
+            
+        """
 
     @staticmethod
     def _elementIndex(
@@ -188,7 +240,7 @@ class Output(object):
     @staticmethod
     def _validateAttribute(
         attribute: Union[int, str, Sequence[Union[int, str]], None],
-        validAttributes: dict,
+        validAttributes: Enum,
     ) -> Tuple[list, list]:
         """
         Function to validate attribute arguments of element_series, element_attribute,
@@ -211,8 +263,8 @@ class Output(object):
         # not sure if this is the best way, but it felt a bit DRYer to
         # put it into a funciton
 
-        if attribute is None:
-            attributeArray = list(validAttributes)
+        if isinstance(attribute, (type(None), EnumMeta)):
+            attributeArray = _enum_keys(validAttributes)
         elif isinstance(attribute, arrayish):
             attributeArray = attribute
         else:
@@ -229,15 +281,15 @@ class Output(object):
 
             elif isinstance(attrib, (int, npint)):
                 # will raise index error if not in range
-                attribName = list(validAttributes)[attrib]
+                attribName = _enum_keys(validAttributes)[attrib]
                 attributeArray[i] = attribName
-                attributeIndexArray.append(validAttributes.get(attribName))
+                attributeIndexArray.append(_enum_get(validAttributes, attribName))
 
             elif isinstance(attrib, str):
-                index = validAttributes.get(attrib)
+                index = _enum_get(validAttributes, attrib)
                 if index is None:
                     raise ValueError(
-                        f"Attribute {attrib} not in valid attribute list: {list(validAttributes)}"
+                        f"Attribute {attrib} not in valid attribute list: {_enum_keys(validAttributes)}"
                     )
                 attributeIndexArray.append(index)
             else:
@@ -245,7 +297,7 @@ class Output(object):
                     f"Input type: {type(attrib)} not valid. Must be one of int, str, or Enum"
                 )
 
-        attributeIndexArray = [validAttributes.get(atr, -1) for atr in attributeArray]
+        # attributeIndexArray = [validAttributes.get(atr, -1) for atr in attributeArray]
 
         return attributeArray, attributeIndexArray
 
@@ -253,7 +305,7 @@ class Output(object):
     def _validateElement(
         element: Union[int, str, Sequence[Union[int, str]], None],
         validElements: Sequence[str],
-    ) -> Tuple[list, list]:
+    ) -> Tuple[List[str], List[int]]:
         """
         Function to validate element arguments of element_series, element_attribute,
         and element_result functions.
@@ -281,7 +333,9 @@ class Output(object):
         elif isinstance(element, arrayish):
             elementArray = element
         else:
-            elementArray = [element]
+            # ignore typing since types of this output list
+            # are reconciled in the next loop. mypy was complaining.
+            elementArray = [element]  # type: ignore
 
         elementIndexArray = []
 
@@ -321,16 +375,16 @@ class Output(object):
         """
 
         elems = []
-        if name in self.subcatch_attributes:
+        if name.lower() in _enum_keys(self.subcatch_attributes):
             elems.append("subcatchment")
 
-        if name in self.node_attributes:
+        if name.lower() in _enum_keys(self.node_attributes):
             elems.append("node")
 
-        if name in self.link_attributes:
+        if name.lower() in _enum_keys(self.link_attributes):
             elems.append("link")
 
-        if name in self.system_attributes:
+        if name.lower() in _enum_keys(self.system_attributes):
             elems.append("system")
 
         if len(elems) > 0:
@@ -383,14 +437,9 @@ class Output(object):
 
                 for i, nom in enumerate(self._pollutants):
                     # extend enums to include pollutants
-                    extend_enum(self._subcatchAttrEnum, nom.upper(), 8 + i)
-                    extend_enum(self._nodeAttrEnum, nom.upper(), 6 + i)
-                    extend_enum(self._linkAttrEnum, nom.upper(), 5 + i)
-
-                    # add lower case pollutant names to enum dicts
-                    self.subcatch_attributes[nom] = self._subcatchAttrEnum[nom.upper()]
-                    self.node_attributes[nom] = self._nodeAttrEnum[nom.upper()]
-                    self.link_attributes[nom] = self._linkAttrEnum[nom.upper()]
+                    extend_enum(self.subcatch_attributes, nom.upper(), 8 + i)
+                    extend_enum(self.node_attributes, nom.upper(), 6 + i)
+                    extend_enum(self.link_attributes, nom.upper(), 5 + i)
 
         return True
 
@@ -499,7 +548,7 @@ class Output(object):
         self._project_size = output.get_proj_size(self._handle)
 
     @property
-    def pollutants(self) -> Tuple[str]:
+    def pollutants(self) -> Tuple[str, ...]:
         """Return a tuple of pollutants available in SWMM binary output file.
 
         Parameters
@@ -540,7 +589,7 @@ class Output(object):
         return tuple(output.get_units(self._handle))  # type: ignore
 
     @property
-    def units(self):
+    def units(self) -> List[str]:
         """Return SWMM binary output file unit type from `swmm.toolkit.shared_enum.UnitSystem`.
 
         Parameters
@@ -550,6 +599,11 @@ class Output(object):
         -------
         List[str]
             List of string names for system units, flow units, and units for each pollutant.
+
+            Values returned are the names from swmm.toolkit.shared_enum:
+                UnitSystem
+                FlowUnits
+                ConcUnits
 
         """
         return [
@@ -635,9 +689,10 @@ class Output(object):
             return [ifNone]
 
         dt = asarray(dateTime).flatten()
+
         # if passing swmm time step, no indexing necessary
-        if dt.dtype == int:
-            return dt.tolist()
+        if dt.dtype in (float, int):
+            return dt.astype(int).tolist()
 
         # ensure datetime value
         dt = to_datetime(dateTime)
@@ -692,14 +747,17 @@ class Output(object):
 
         if isinstance(subcatchment, (str, int, type(None))):
             return self._elementIndex(subcatchment, self.subcatchments, "subcatchment")
-        else:
+
+        elif subcatchment is not None:
             return [
                 self._elementIndex(sub, self.subcatchments, "subcatchment")
                 for sub in subcatchment
             ]
+        else:
+            raise TypeError("Invalid type for _subcatchmentIndex argument")
 
     @property
-    def subcatchments(self) -> Tuple[str]:
+    def subcatchments(self) -> Tuple[str, ...]:
         """Return a tuple of subcatchments available in SWMM output binary file.
 
         Parameters
@@ -744,11 +802,16 @@ class Output(object):
 
         if isinstance(node, (str, int, type(None))):
             return self._elementIndex(node, self.nodes, "node")
-        else:
+
+        # elif here because mypy issues
+        elif node is not None:
             return [self._elementIndex(nd, self.nodes, "node") for nd in node]
 
+        else:
+            raise TypeError("Invalid type for self._nodeIndex argument")
+
     @property
-    def nodes(self) -> Tuple[str]:
+    def nodes(self) -> Tuple[str, ...]:
         """Return a tuple of nodes available in SWMM binary output file.
 
         Parameters
@@ -792,11 +855,16 @@ class Output(object):
         """
         if isinstance(link, (str, int, type(None))):
             return self._elementIndex(link, self.links, "link")
-        else:
+
+        # elif here because mypy issues
+        elif link is not None:
             return [self._elementIndex(lnk, self.links, "link") for lnk in link]
 
+        else:
+            raise TypeError("Invalid type for self._linkIndex argument")
+
     @property
-    def links(self) -> Tuple[str]:
+    def links(self) -> Tuple[str, ...]:
         """Return a tuple of links available in SWMM binary output file.
 
         Parameters
@@ -823,6 +891,7 @@ class Output(object):
         )
 
     ####### series getters #######
+
     def _model_series(
         self,
         elementIndexArray: List[int],
@@ -1022,14 +1091,16 @@ class Output(object):
                     asarray(attributeArray).repeat(endIndex - startIndex)
                 )
                 names.append("attribute")
-
-        return (
+        index = (
             MultiIndex.from_arrays(
                 indexArrays,
                 names=names,
-            ),
-            cols,
+            )
+            if len(indexArrays) > 1
+            else Index(indexArrays[0], name=names[0])
         )
+
+        return index, cols
 
     def subcatch_series(
         self,
@@ -1039,8 +1110,8 @@ class Output(object):
             "runoff_rate",
             "gw_outflow_rate",
         ),
-        start: Union[str, int, datetime, None] = None,
-        end: Union[str, int, datetime, None] = None,
+        start: Union[str, int, datetime] = None,
+        end: Union[str, int, datetime] = None,
         columns: Optional[str] = "attr",
         asframe: bool = True,
     ) -> Union[DataFrame, ndarray]:
@@ -1061,11 +1132,11 @@ class Output(object):
             gw_table_elev, soil_moisture**.
 
 
-            Defaults to: `('rainfall','runoff_rate','gw_outflow_rate').`
+            Defaults to: `('rainfall', 'runoff_rate', 'gw_outflow_rate').`
 
 
             Can also input the integer index of the attribute you would like to
-            pull or the actual enum from swmm.toolkit.shared_enum.SubcatchAttribute.
+            pull or the actual enum from Output.subcatch_attributes.
 
             Setting to None indicates all attributes.
 
@@ -1098,6 +1169,100 @@ class Output(object):
         Union[pd.DataFrame,np.ndarray]
             A DataFrame or ndarray of attribute values in each column for requested
             date range and subcatchments.
+
+        Examples
+        ---------
+
+        Pull single time series for a single subcatchment
+
+        >>> from swmm.pandas import Output,test_out_path
+        >>> out = Output(test_out_path)
+        >>> out.subcatch_series('SUB1', 'runoff_rate')
+                             runoff_rate
+        datetime
+        1900-01-01 00:05:00     0.000000
+        1900-01-01 00:10:00     0.000000
+        1900-01-01 00:15:00     0.000000
+        1900-01-01 00:20:00     0.000000
+        1900-01-01 00:25:00     0.000000
+        ...                          ...
+        1900-01-01 23:40:00     0.025057
+        1900-01-01 23:45:00     0.025057
+        1900-01-01 23:50:00     0.025057
+        1900-01-01 23:55:00     0.025057
+        1900-01-02 00:00:00     0.025057
+        [288 rows x 1 columns]
+
+        Pull a wide-form dataframe for all parameters for a catchment
+
+        >>> out.subcatch_series('SUB1', out.subcatch_attributes)
+                            rainfall  snow_depth  evap_loss  infil_loss  ...  soil_moisture  groundwater  pol_rainfall  sewage
+        datetime                                                          ...
+        1900-01-01 00:05:00   0.03000         0.0        0.0    0.020820  ...       0.276035          0.0           0.0     0.0
+        1900-01-01 00:10:00   0.03000         0.0        0.0    0.020952  ...       0.276053          0.0           0.0     0.0
+        1900-01-01 00:15:00   0.03000         0.0        0.0    0.021107  ...       0.276071          0.0           0.0     0.0
+        1900-01-01 00:20:00   0.03000         0.0        0.0    0.021260  ...       0.276089          0.0           0.0     0.0
+        1900-01-01 00:25:00   0.03000         0.0        0.0    0.021397  ...       0.276107          0.0           0.0     0.0
+        ...                       ...         ...        ...         ...  ...            ...          ...           ...     ...
+        1900-01-01 23:40:00   0.03224         0.0        0.0    0.027270  ...       0.280026          0.0         100.0     0.0
+        1900-01-01 23:45:00   0.03224         0.0        0.0    0.027270  ...       0.280026          0.0         100.0     0.0
+        1900-01-01 23:50:00   0.03224         0.0        0.0    0.027270  ...       0.280026          0.0         100.0     0.0
+        1900-01-01 23:55:00   0.03224         0.0        0.0    0.027270  ...       0.280026          0.0         100.0     0.0
+        1900-01-02 00:00:00   0.00000         0.0        0.0    0.027270  ...       0.280026          0.0         100.0     0.0
+        [288 rows x 11 columns]
+
+        Pull a long-form dataframe of all catchments and attributes
+
+        >>> out.subcatch_series(out.subcatchments, out.subcatch_attributes, columns=None)
+                                               Result
+        datetime            element attribute
+        1900-01-01 00:05:00 SUB1    rainfall     0.03
+        1900-01-01 00:10:00 SUB1    rainfall     0.03
+        1900-01-01 00:15:00 SUB1    rainfall     0.03
+        1900-01-01 00:20:00 SUB1    rainfall     0.03
+        1900-01-01 00:25:00 SUB1    rainfall     0.03
+        ...                                       ...
+        1900-01-01 23:40:00 SUB3    sewage       0.00
+        1900-01-01 23:45:00 SUB3    sewage       0.00
+        1900-01-01 23:50:00 SUB3    sewage       0.00
+        1900-01-01 23:55:00 SUB3    sewage       0.00
+        1900-01-02 00:00:00 SUB3    sewage       0.00
+        [9504 rows x 1 columns]
+
+        Pull two parameters for one subcatchment and plot the results
+
+        .. plot::
+
+           import matplotlib.pyplot as plt
+           from matplotlib.dates import DateFormatter
+           from swmm.pandas import Output,test_out_path
+
+           # read output file in Output object
+           out = Output(test_out_path)
+
+           # pull rainfall and runoff_rate timeseries and plot them
+           ax = out.subcatch_series('SUB1', ['rainfall', 'runoff_rate']).plot(figsize=(8,4))
+           plt.title("SUB1 Params")
+           plt.tight_layout()
+           plt.show()
+
+        Pull the one parameter for all subcatchments
+
+        .. plot::
+
+           import matplotlib.pyplot as plt
+           from matplotlib.dates import DateFormatter
+           from swmm.pandas import Output,test_out_path
+
+           # read output file in Output object
+           out = Output(test_out_path)
+
+           # pull runoff_rate timeseries for all cathments and plot them
+           ax = out.subcatch_series(out.subcatchments, 'runoff_rate', columns='elem').plot(figsize=(8,4))
+           plt.title("Runoff Rate")
+           plt.tight_layout()
+           plt.show()
+
 
         """
         subcatchementArray, subcatchmentIndexArray = self._validateElement(
@@ -1161,7 +1326,7 @@ class Output(object):
             defaults to: `('invert_depth','flooding_losses','total_inflow')`
 
             Can also input the integer index of the attribute you would like to
-            pull or the actual enum from swmm.toolkit.shared_enum.NodeAttribute.
+            pull or the actual enum from Output.node_attributes.
 
             Setting to None indicates all attributes.
 
@@ -1195,6 +1360,100 @@ class Output(object):
             A DataFrame or ndarray of attribute values in each column for requested
             date range and nodes.
 
+        Examples
+        ---------
+
+        Pull single time series for a single node
+
+        >>> from swmm.pandas import Output,test_out_path
+        >>> out = Output(test_out_path)
+        >>> out.node_series('JUNC2', 'invert_depth')
+                             invert_depth
+        datetime
+        1900-01-01 00:05:00      0.334742
+        1900-01-01 00:10:00      0.509440
+        1900-01-01 00:15:00      0.562722
+        1900-01-01 00:20:00      0.602668
+        1900-01-01 00:25:00      0.631424
+        ...                           ...
+        1900-01-01 23:40:00      0.766949
+        1900-01-01 23:45:00      0.766949
+        1900-01-01 23:50:00      0.766949
+        1900-01-01 23:55:00      0.766949
+        1900-01-02 00:00:00      0.766949
+        [288 rows x 1 columns]
+
+        Pull a wide-form dataframe for all parameters for a node
+
+        >>> out.node_series('JUNC2', out.node_attributes)
+                           invert_depth  hydraulic_head  ponded_volume  lateral_inflow  total_inflow  flooding_losses  groundwater  pol_rainfall     sewage
+        datetime
+        1900-01-01 00:05:00      0.334742       -0.705258            0.0        0.185754      0.185785              0.0     3.935642      0.000000  95.884094
+        1900-01-01 00:10:00      0.509440       -0.530560            0.0        0.196764      0.197044              0.0     8.902034      0.000000  90.335831
+        1900-01-01 00:15:00      0.562722       -0.477278            0.0        0.198615      0.199436              0.0     9.038609      0.000000  89.253334
+        1900-01-01 00:20:00      0.602668       -0.437332            0.0        0.200802      0.202462              0.0     9.259741      0.000000  87.919571
+        1900-01-01 00:25:00      0.631424       -0.408576            0.0        0.203108      0.205802              0.0     9.523322      0.000000  86.492836
+        ...                           ...             ...            ...             ...           ...              ...          ...           ...        ...
+        1900-01-01 23:40:00      0.766949       -0.273052            0.0        0.314470      0.352183              0.0    15.293419     39.303375  45.430920
+        1900-01-01 23:45:00      0.766949       -0.273052            0.0        0.314499      0.352183              0.0    15.313400     39.292118  45.430920
+        1900-01-01 23:50:00      0.766949       -0.273052            0.0        0.314530      0.352183              0.0    15.333243     39.281300  45.430920
+        1900-01-01 23:55:00      0.766949       -0.273052            0.0        0.314559      0.352183              0.0    15.352408     39.271194  45.430920
+        1900-01-02 00:00:00      0.766949       -0.273052            0.0        0.314590      0.352183              0.0    15.371475     39.261478  45.430920
+        [288 rows x 9 columns]
+
+        Pull a long-form dataframe of all nodes and attributes
+
+        >>> out.node_series('JUNC2', out.node_attributes, columns=None)
+                                                    Result
+        datetime            element attribute
+        1900-01-01 00:05:00 JUNC1   invert_depth   0.002143
+        1900-01-01 00:10:00 JUNC1   invert_depth   0.010006
+        1900-01-01 00:15:00 JUNC1   invert_depth   0.017985
+        1900-01-01 00:20:00 JUNC1   invert_depth   0.025063
+        1900-01-01 00:25:00 JUNC1   invert_depth   0.031329
+        ...                                             ...
+        1900-01-01 23:40:00 STOR1   sewage        51.502193
+        1900-01-01 23:45:00 STOR1   sewage        51.164684
+        1900-01-01 23:50:00 STOR1   sewage        50.905445
+        1900-01-01 23:55:00 STOR1   sewage        50.715385
+        1900-01-02 00:00:00 STOR1   sewage        50.574486
+        [23328 rows x 1 columns]
+
+        Pull flow timeseries and calculate the total flow volume for all nodes
+
+
+        >>> from swmm.pandas.constants import gal_per_cf
+        >>> df = out.node_series(out.nodes, ['lateral_inflow','total_inflow','flooding_losses'])
+                                     lateral_inflow  total_inflow  flooding_losses
+        datetime            element
+        1900-01-01 00:05:00 JUNC1          0.002362      0.002362              0.0
+        1900-01-01 00:10:00 JUNC1          0.005792      0.005792              0.0
+        1900-01-01 00:15:00 JUNC1          0.006524      0.006524              0.0
+        1900-01-01 00:20:00 JUNC1          0.007306      0.007306              0.0
+        1900-01-01 00:25:00 JUNC1          0.008039      0.008039              0.0
+        ...                                     ...           ...              ...
+        1900-01-01 23:40:00 STOR1          0.000000      1.455056              0.0
+        1900-01-01 23:45:00 STOR1          0.000000      1.455056              0.0
+        1900-01-01 23:50:00 STOR1          0.000000      1.455056              0.0
+        1900-01-01 23:55:00 STOR1          0.000000      1.455056              0.0
+        1900-01-02 00:00:00 STOR1          0.000000      1.455056              0.0
+        [2592 rows x 3 columns]
+        #----------------------------------------------------------------------------
+        # group by element name and sum,
+        # then multiply by reporting timestep in seconds
+        # then convert to millions of gallons
+        >>> df.groupby('element').sum() * out.report * gal_per_cf / 1e6
+                lateral_inflow  total_inflow  flooding_losses
+        element
+        JUNC1          0.101562      0.101898         0.000053
+        JUNC2          0.544891      0.857012         0.000000
+        JUNC3          0.000000      0.502078         0.080634
+        JUNC4          1.813826      2.096243         0.317929
+        JUNC5          0.000000      1.870291         0.073878
+        JUNC6          0.000000      1.701455         0.000000
+        OUT1           0.000000      1.698081         0.000000
+        OUT2           0.000000      0.575617         0.000000
+        STOR1          0.000000      1.862843         0.172482
         """
         nodeArray, nodeIndexArray = self._validateElement(node, self.nodes)
 
@@ -1255,7 +1514,7 @@ class Output(object):
             defaults to: `('flow_rate','flow_velocity','flow_depth')`
 
             Can also input the integer index of the attribute you would like to
-            pull or the actual enum from swmm.toolkit.shared_enum.LinkAttribute.
+            pull or the actual enum from output.link_attributes.
 
             Setting to None indicates all attributes.
 
@@ -1288,6 +1547,103 @@ class Output(object):
         Union[pd.DataFrame,np.ndarray]
             A DataFrame or ndarray of attribute values in each column for requested
             date range and links.
+
+        Examples
+        ---------
+
+        Pull flow rate for two conduits
+
+        >>> from swmm.pandas import Output,test_out_path
+        >>> out = Output(test_out_path)
+        >>> out.link_series(['COND1','COND6'],out.link_attributes.FLOW_RATE,columns='elem')
+                                COND1   COND6
+        datetime
+        1900-01-01 00:05:00  0.000031  0.0000
+        1900-01-01 00:10:00  0.000280  0.0000
+        1900-01-01 00:15:00  0.000820  0.0000
+        1900-01-01 00:20:00  0.001660  0.0000
+        1900-01-01 00:25:00  0.002694  0.0000
+        ...                       ...     ...
+        1900-01-01 23:40:00  0.037800  1.5028
+        1900-01-01 23:45:00  0.037800  1.5028
+        1900-01-01 23:50:00  0.037800  1.5028
+        1900-01-01 23:55:00  0.037800  1.5028
+        1900-01-02 00:00:00  0.037800  1.5028
+        [288 rows x 2 columns]
+
+        Pull a wide-form dataframe for all parameters for a link
+
+        >>> out.node_series('COND1', out.link_attributes)
+                            flow_rate  flow_depth  flow_velocity  flow_volume  capacity  groundwater  pol_rainfall        sewage
+        datetime
+        1900-01-01 00:05:00   0.000031    0.053857       0.001116    23.910770  0.024351    79.488449      0.000000  0.000000e+00
+        1900-01-01 00:10:00   0.000280    0.134876       0.004258    76.354103  0.080857    93.174545      0.000000  0.000000e+00
+        1900-01-01 00:15:00   0.000820    0.165356       0.009518    99.407425  0.108456    91.125893      0.000000  0.000000e+00
+        1900-01-01 00:20:00   0.001660    0.188868       0.016023   117.895081  0.131204    88.518318      0.000000  0.000000e+00
+        1900-01-01 00:25:00   0.002694    0.206378       0.022971   131.773941  0.148936    86.187752      0.000000  0.000000e+00
+        ...                        ...         ...            ...          ...       ...          ...           ...           ...
+        1900-01-01 23:40:00   0.037800    0.312581       0.180144   212.443344  0.267168    31.683731     68.344780  6.173063e-08
+        1900-01-01 23:45:00   0.037800    0.312581       0.180144   212.443344  0.267168    31.788561     68.242958  5.872794e-08
+        1900-01-01 23:50:00   0.037800    0.312581       0.180144   212.443344  0.267168    31.890982     68.144737  5.583060e-08
+        1900-01-01 23:55:00   0.037800    0.312581       0.180144   212.443344  0.267168    31.988274     68.052620  5.311425e-08
+        1900-01-02 00:00:00   0.037800    0.312581       0.180144   212.443344  0.267168    32.083355     67.963829  5.049533e-08
+
+        [288 rows x 8 columns]
+
+        Pull a long-form dataframe of all links and attributes
+
+        >>> out.node_series(out.links, out.link_attributes, columns=None)
+                                    flow_rate  flow_depth  flow_velocity  flow_volume  capacity  groundwater  pol_rainfall    sewage
+        datetime            element
+        1900-01-01 00:05:00 COND1     0.000031    0.053857       0.001116    23.910770  0.024351    79.488449      0.000000   0.00000
+        1900-01-01 00:10:00 COND1     0.000280    0.134876       0.004258    76.354103  0.080857    93.174545      0.000000   0.00000
+        1900-01-01 00:15:00 COND1     0.000820    0.165356       0.009518    99.407425  0.108456    91.125893      0.000000   0.00000
+        1900-01-01 00:20:00 COND1     0.001660    0.188868       0.016023   117.895081  0.131204    88.518318      0.000000   0.00000
+        1900-01-01 00:25:00 COND1     0.002694    0.206378       0.022971   131.773941  0.148936    86.187752      0.000000   0.00000
+        ...                                ...         ...            ...          ...       ...          ...           ...       ...
+        1900-01-01 23:40:00 WR1       0.000000    0.000000       0.000000     0.000000  1.000000    15.293419     39.303375  45.43092
+        1900-01-01 23:45:00 WR1       0.000000    0.000000       0.000000     0.000000  1.000000    15.313400     39.292118  45.43092
+        1900-01-01 23:50:00 WR1       0.000000    0.000000       0.000000     0.000000  1.000000    15.333243     39.281300  45.43092
+        1900-01-01 23:55:00 WR1       0.000000    0.000000       0.000000     0.000000  1.000000    15.352408     39.271194  45.43092
+        1900-01-02 00:00:00 WR1       0.000000    0.000000       0.000000     0.000000  1.000000    15.371475     39.261478  45.43092
+        [2304 rows x 8 columns]
+
+        Pull flow timeseries and pollutant tracer concentrations for a link and plot
+
+        .. plot::
+
+            import matplotlib.pyplot as plt
+            import matplotlib.dates as mdates
+            from swmm.pandas import Output,test_out_path
+
+            out = Output(test_out_path)
+            df = out.link_series('COND6',['flow_rate','groundwater','pol_rainfall','sewage'])
+
+            # set up figure
+            fig,ax = plt.subplots(figsize=(8,4))
+
+            # plot flow rate on primary yaxis
+            ax.plot(df.flow_rate,label="flow rate")
+
+            # plot pollutant concentrations on secondary axis
+            # rainfall, DWF, and groundwater were given 100 mg/L pollutant
+            # concentrations to serve as tracers
+            ax1 = ax.twinx()
+            ax1.plot(df.groundwater,ls = '--',label="groundwater tracer")
+            ax1.plot(df.pol_rainfall,ls = '--',label="rainfall tracer")
+            ax1.plot(df.sewage,ls = '--',label="sewage tracer")
+
+            # style axes
+            ax.set_ylabel("Flow Rate (cfs)")
+            ax.xaxis.set_major_formatter(mdates.DateFormatter("%H:%M"))
+            ax1.set_ylabel("Percent")
+
+            # add legend and show figure
+            fig.legend(bbox_to_anchor=(1,1),bbox_transform=ax.transAxes)
+            fig.tight_layout()
+
+
+            fig.show()
 
         """
         linkArray, linkIndexArray = self._validateElement(link, self.links)
@@ -1342,7 +1698,7 @@ class Output(object):
             defaults to `None`.
 
             Can also input the integer index of the attribute you would like to
-            pull or the actual enum from swmm.toolkit.shared_enum.SystemAttribute.
+            pull or the actual enum from Output.system_attributes.
 
             Setting to None indicates all attributes.
 
@@ -1363,6 +1719,29 @@ class Output(object):
         -------
         Union[pd.DataFrame,np.ndarray]
             DataFrame or ndarray of attribute values in each column for request date range
+
+        Examples
+        ---------
+
+        Pull two system attribute time series
+
+        >>> from swmm.pandas import Output,test_out_path
+        >>> out = Output(test_out_path)
+        >>> out.system_series(['total_lateral_inflow','rainfall'])
+                            total_lateral_inflow  rainfall
+        datetime
+        1900-01-01 00:05:00              0.902807   0.03000
+        1900-01-01 00:10:00              0.902800   0.03000
+        1900-01-01 00:15:00              0.902793   0.03000
+        1900-01-01 00:20:00              0.902786   0.03000
+        1900-01-01 00:25:00              0.902779   0.03000
+        ...                                   ...       ...
+        1900-01-01 23:40:00              1.431874   0.03224
+        1900-01-01 23:45:00              1.431869   0.03224
+        1900-01-01 23:50:00              1.431876   0.03224
+        1900-01-01 23:55:00              1.431894   0.03224
+        1900-01-02 00:00:00              1.431921   0.00000
+        [288 rows x 2 columns]
 
         """
 
@@ -1418,7 +1797,7 @@ class Output(object):
             Defaults to: `('rainfall','runoff_rate','gw_outflow_rate').`
 
             You can also input the integer index of the attribute you would like to
-            pull or the actual enum from swmm.toolkit.shared_enum.SubcatchAttribute.
+            pull or the actual enum from Output.subcatch_attributes.
 
             Setting to None indicates all attributes.
 
@@ -1429,6 +1808,29 @@ class Output(object):
         -------
         Union[pd.DataFrame, np.ndarray]
             A DataFrame or ndarray of attribute values in each column for requested simulation time.
+
+        Examples
+        ---------
+        Pull rainfall at start of simulation
+
+        >>> from swmm.pandas import Output,test_out_path
+        >>> out = Output(test_out_path)
+        >>> out.subcatch_attribute(0,'rainfall')
+                          rainfall
+            subcatchment
+            SUB1              0.03
+            SUB2              0.03
+            SUB3              0.03
+
+        Pull rainfall at middle of simulation
+
+        >>> out.subcatch_attribute(out.period/2,'rainfall')
+                      rainfall
+        subcatchment
+        SUB1             1.212
+        SUB2             1.212
+        SUB3             1.212
+
 
         """
 
@@ -1482,7 +1884,7 @@ class Output(object):
             defaults to: `('invert_depth','flooding_losses','total_inflow')`
 
             Can also input the integer index of the attribute you would like to
-            pull or the actual enum from swmm.toolkit.shared_enum.NodeAttribute.
+            pull or the actual enum from Output.node_attributes.
 
             Setting to None indicates all attributes.
 
@@ -1544,7 +1946,7 @@ class Output(object):
             defaults to `('flow_rate','flow_velocity','flow_depth')`
 
             Can also input the integer index of the attribute you would like to
-            pull or the actual enum from swmm.toolkit.shared_enum.LinkAttribute.
+            pull or the actual enum from Output.link_attributes.
 
             Setting to None indicates all attributes.
 
@@ -1604,7 +2006,7 @@ class Output(object):
             defaults to `None`.
 
             Can also input the integer index of the attribute you would like to
-            pull or the actual enum from swmm.toolkit.shared_enum.SystemAttribute.
+            pull or the actual enum from Output.system_attributes.
 
             Setting to None indicates all attributes.
 
@@ -1709,7 +2111,7 @@ class Output(object):
         dfIndex = Index(labels, name=label)
 
         return DataFrame(
-            values, index=dfIndex, columns=list(self.subcatch_attributes.keys())
+            values, index=dfIndex, columns=_enum_keys(self.subcatch_attributes)
         )
 
     @output_open_handler
@@ -1779,7 +2181,7 @@ class Output(object):
         dfIndex = Index(labels, name=label)
 
         return DataFrame(
-            values, index=dfIndex, columns=list(self.node_attributes.keys())
+            values, index=dfIndex, columns=_enum_keys(self.node_attributes)
         )
 
     @output_open_handler
@@ -1850,7 +2252,7 @@ class Output(object):
         dfIndex = Index(labels, name=label)
 
         return DataFrame(
-            values, index=dfIndex, columns=list(self.link_attributes.keys())
+            values, index=dfIndex, columns=_enum_keys(self.link_attributes)
         )
 
     @output_open_handler
@@ -1883,7 +2285,7 @@ class Output(object):
         if not asframe:
             return values
 
-        dfIndex = Index(self.system_attributes, name="attribute")
+        dfIndex = Index(_enum_keys(self.system_attributes), name="attribute")
 
         return DataFrame(values, index=dfIndex, columns=["Result"])
 

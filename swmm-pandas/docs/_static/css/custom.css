@@ -1,0 +1,32 @@
+.wy-side-nav-search {
+    background-color:#152454;
+   }
+
+
+
+.wy-nav-content {
+
+    max-width: 1200px;
+    min-height: 100vh;
+
+}
+
+.reference.internal > code{
+    color: #128ee9;
+}
+
+.reference.internal > code:hover{
+    color: #005696;
+    text-decoration: underline;
+}
+
+#contributors-table > tbody > tr > td{
+    vertical-align: top;
+    border: solid #e1e1e1 1px;
+    padding: 10pX;
+    }
+
+    
+#contributors-table > tbody > tr > td:hover{
+    transform: scale(1.05);
+    }

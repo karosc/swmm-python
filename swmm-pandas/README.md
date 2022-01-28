@@ -24,11 +24,26 @@ swmm-pandas is a high level api for interacting with swmm files via pandas dataf
 
 ## Contributors
 
-[![Constantine Karos](https://avatars1.githubusercontent.com/u/36245370?s=70)](https://github.com/karosc) | [![Jenn Wu](https://avatars.githubusercontent.com/u/28812156?s=70)](https://github.com/jennwuu) |
---- | --- |
-[Constantine Karos](https://github.com/karosc) |[Jenn Wuu](https://github.com/jennwuu) |
+<table id="contributors-table">
+  <tr>
+    <td align="center">
+        <a href="https://github.com/karosc"><img src="https://avatars1.githubusercontent.com/u/36245370?s=100" width="100px;" alt=""/>
+            <br />
+            <sub><b>Constantine Karos</b></sub>
+        </a>
+    </td>
+    <td align="center">
+        <a href="https://github.com/jennwuu"><img src="https://avatars.githubusercontent.com/u/28812156?s=100" width="100px;" alt=""/>
+            <br />
+            <sub><b>Jenn Wuu</b></sub>
+        </a>
+    </td>
+    
+ </tr>
+</table>
 
 
-## License
+ ## License
+
 
 [CC BY 4.0](./LICENSE.md)

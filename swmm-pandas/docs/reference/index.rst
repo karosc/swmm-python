@@ -4,5 +4,4 @@ API Reference
 .. toctree::
    :maxdepth: 4
 
-   output
-   structure
+   output/index.rst

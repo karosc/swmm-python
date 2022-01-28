@@ -19,6 +19,11 @@
 #
 import os
 import sys
+import matplotlib.pyplot as plt
+
+plt.rcParams["figure.dpi"] = 200
+plt.rcParams["figure.autolayout"] = True
+
 
 sys.path.insert(0, os.path.abspath("../"))
 
@@ -33,7 +38,11 @@ import swmm.pandas
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
 extensions = [
+    # "matplotlib.sphinxext.only_directives",
+    "matplotlib.sphinxext.plot_directive",
     "myst_parser",
+    "IPython.sphinxext.ipython_directive",
+    "IPython.sphinxext.ipython_console_highlighting",
     "sphinx.ext.autodoc",
     "sphinx.ext.autosummary",
     "sphinx.ext.viewcode",
@@ -91,7 +100,8 @@ todo_include_todos = False
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = "pydata_sphinx_theme"
+# html_theme = "pydata_sphinx_theme"
+html_theme = "sphinx_rtd_theme"
 
 # Theme options are theme-specific and customize the look and feel of a
 # theme further.  For a list of options available for each theme, see the
@@ -102,6 +112,9 @@ html_theme = "pydata_sphinx_theme"
 
 html_theme_options = {
     "github_url": "https://github.com/karosc/swmm-python/tree/swmm-pandas/swmm-pandas",
+    "navigation_depth": 4,
+    # "show_toc_level": 4,
+    "collapse_navigation": False,
 }
 
 html_logo = "_static/swmm-pandas.png"
@@ -112,6 +125,9 @@ html_favicon = "_static/swmm-python.png"
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ["_static"]
 
+html_css_files = [
+    "css/custom.css",
+]
 
 # -- Options for HTMLHelp output ---------------------------------------
 
@@ -176,3 +192,8 @@ texinfo_documents = [
 numpydoc_show_class_members = False
 autodoc_member_order = "bysource"
 autodoc_typehints = "none"
+autoclass_content = "class"
+
+plot_include_source = True
+plot_html_show_source_link = False
+plot_html_show_formats = False

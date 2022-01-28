@@ -3,36 +3,28 @@ Output
 =========
 .. currentmodule:: swmm.pandas
 
-Constructor
-~~~~~~~~~~~
-.. autosummary::
-   :nosignatures:
-   :toctree: api/
+Constructor and Properties
+---------------------------
+.. autoclass:: Output
 
-   Output
-
-
-Properties
-~~~~~~~~~~~
-
-.. autosummary::
-   :nosignatures:
-   :toctree: api/
-
-   Output.subcatchments
-   Output.links
-   Output.nodes
-   Output.pollutants
-   Output.timeIndex
-   Output.project_size
-   Output.report
-   Output.start
-   Output.end
-   Output.period
-   
+   .. automethod:: __init__
+   .. autoattribute:: subcatch_attributes
+   .. autoattribute:: link_attributes
+   .. autoattribute:: node_attributes
+   .. autoattribute:: system_attributes
+   .. autoattribute:: subcatchments
+   .. autoattribute:: links
+   .. autoattribute:: nodes
+   .. autoattribute:: pollutants
+   .. autoattribute:: project_size
+   .. autoattribute:: report
+   .. autoattribute:: start
+   .. autoattribute:: end
+   .. autoattribute:: period
+   .. autoattribute:: units
 
 Time Series Data
-~~~~~~~~~~~~~~~~~
+-----------------
 Get time series data for one or more elements and one or more variables.
 
 .. autosummary::
@@ -45,8 +37,8 @@ Get time series data for one or more elements and one or more variables.
    Output.system_series
    
 Element Attribute Data
-~~~~~~~~~~~~~~~~~~~~~~~
-Get attribute for a given time step for all elements of a give type.
+-----------------------
+Get attribute for a given time step for all elements of a given type.
 
 .. autosummary::
    :nosignatures:
@@ -58,7 +50,7 @@ Get attribute for a given time step for all elements of a give type.
    Output.system_attribute
 
 Element Result Data
-~~~~~~~~~~~~~~~~~~~~
+--------------------
 Get all attributes for a given set time steps for given set of elements.
 
 .. autosummary::
@@ -71,7 +63,7 @@ Get all attributes for a given set time steps for given set of elements.
    Output.system_result
 
 Helper Methods
-~~~~~~~~~~~~~~~~~~~~
+--------------
 
 .. autosummary::
    :nosignatures:

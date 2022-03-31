@@ -2,7 +2,7 @@ API Reference
 ==============
 
 .. toctree::
-   :maxdepth: 4
+   :maxdepth: 3
 
    output/index.rst
    report/index.rst

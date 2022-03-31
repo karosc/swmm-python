@@ -40,6 +40,7 @@ import swmm.pandas
 extensions = [
     # "matplotlib.sphinxext.only_directives",
     "matplotlib.sphinxext.plot_directive",
+    "sphinx.ext.intersphinx",
     "myst_parser",
     "IPython.sphinxext.ipython_directive",
     "IPython.sphinxext.ipython_console_highlighting",
@@ -86,8 +87,13 @@ language = None
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This patterns also effect to html_static_path and html_extra_path
-exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
-
+exclude_patterns = [
+    "_build",
+    "**.ipynb_checkpoints",
+    "*/autosummary/*.rst",
+    "Thumbs.db",
+    ".DS_Store",
+]
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = "friendly"
 
@@ -99,26 +105,54 @@ todo_include_todos = False
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
-#
-# html_theme = "pydata_sphinx_theme"
-html_theme = "sphinx_rtd_theme"
+extensions.append("sphinx_material")
+html_title = "swmm-pandas"
+html_theme = "sphinx_material"
 
 # Theme options are theme-specific and customize the look and feel of a
 # theme further.  For a list of options available for each theme, see the
 # documentation.
-#
-# html_theme_options = {}
+html_sidebars = {
+    "**": ["logo-text.html", "globaltoc.html", "localtoc.html", "searchbox.html"]
+}
 
 
 html_theme_options = {
-    "github_url": "https://github.com/karosc/swmm-python/tree/swmm-pandas/swmm-pandas",
-    "navigation_depth": 4,
-    # "show_toc_level": 4,
-    "collapse_navigation": False,
+    "base_url": "swmm.karosc.com",
+    "repo_url": "https://github.com/karosc/swmm-python/tree/swmm-pandas/swmm-pandas",
+    "repo_name": "swmm-pandas",
+    # "html_minify": True,
+    # "css_minify": True,
+    "theme_color": "red",
+    "color_primary": "indigo",
+    "color_accent": "blue",
+    "nav_title": "swmm-pandas",
+    "globaltoc_depth": 3,
+    "globaltoc_includehidden": True,
+    "globaltoc_collapse": True,
+    "nav_title": "swmm-pandas {0}".format(version),
+    "master_doc": False,
+    "nav_links": [],
+    "heroes": {
+        "index": "",
+    },
 }
 
-html_logo = "_static/swmm-pandas.png"
-html_favicon = "_static/swmm-python.png"
+html_logo = "_static/favicon.png"
+html_favicon = "_static/favicon.png"
+
+numpydoc_show_class_members = False
+autodoc_member_order = "bysource"
+autodoc_typehints = "none"
+autoclass_content = "both"
+
+plot_include_source = True
+plot_html_show_source_link = False
+plot_html_show_formats = False
+
+html_last_updated_fmt = ""
+html_use_index = False
+html_domain_indices = False
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
@@ -126,8 +160,12 @@ html_favicon = "_static/swmm-python.png"
 html_static_path = ["_static"]
 
 html_css_files = [
-    "css/custom.css",
+    # "css/custom.css",
 ]
+
+# If false, no module index is generated.
+html_domain_indices = True
+
 
 # -- Options for HTMLHelp output ---------------------------------------
 
@@ -189,11 +227,15 @@ texinfo_documents = [
     ),
 ]
 
-numpydoc_show_class_members = False
-autodoc_member_order = "bysource"
-autodoc_typehints = "none"
-autoclass_content = "class"
 
-plot_include_source = True
-plot_html_show_source_link = False
-plot_html_show_formats = False
+# NBSphinx options
+nbsphinx_execute = "never"
+
+intersphinx_mapping = {
+    "numpy": ("https://docs.scipy.org/doc/numpy/", None),
+    "python": ("https://docs.python.org/3/", None),
+    "pydagogue": ("https://matthew-brett.github.io/pydagogue/", None),
+    "matplotlib": ("https://matplotlib.org/", None),
+    "scipy": ("https://docs.scipy.org/doc/scipy/reference/", None),
+    "pandas": ("https://pandas.pydata.org/pandas-docs/stable/", None),
+}

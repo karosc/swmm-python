@@ -7,7 +7,6 @@ Constructor and Properties
 ---------------------------
 .. autoclass:: Output
 
-   .. automethod:: __init__
    .. autoattribute:: subcatch_attributes
    .. autoattribute:: link_attributes
    .. autoattribute:: node_attributes
@@ -31,7 +30,7 @@ Get time series data for one or more elements and one or more variables.
    :nosignatures:
    :toctree: api/
 
-   Output.link_series
+   swmm.pandas.Output.link_series
    Output.node_series   
    Output.subcatch_series
    Output.system_series

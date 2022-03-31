@@ -1,7 +1,8 @@
 from typing import Sequence, Union
 
 import numpy as np
-import pandas as pd
+from pandas.core.api import DataFrame
+from pandas._libs.missing import NA
 
 from swmm.pandas.output.tools import arrayish
 
@@ -14,7 +15,7 @@ volumeConstants = {
     "MLD": dict(multiplier=(1 / 86400) * 1000, volumeUnits="CM"),
 }
 
-hourUnit = np.timedelta64(1, "h")
+hour_unit = np.timedelta64(1, "h")
 
 # This class as it is could be DRYer, but it should also integrate with the
 # inp file module and rpt file module when they are implemented. Plan to refactor
@@ -56,7 +57,7 @@ class Structure(object):
         """A list of the node(s) that belong to this structure"""
 
     @property
-    def floodFrame(self) -> pd.DataFrame:
+    def floodFrame(self) -> DataFrame:
         """
         Returns a pandas DataFrame with the flood rates
         of each node in the structure
@@ -76,7 +77,7 @@ class Structure(object):
         return self._floodFrame
 
     @property
-    def flowFrame(self) -> pd.DataFrame:
+    def flowFrame(self) -> DataFrame:
         """
         Returns a pandas DataFrame with the flow rates
         of each link in the structure
@@ -97,9 +98,9 @@ class Structure(object):
 
     def _aggSeries(
         self,
-        df: pd.DataFrame,
+        df: DataFrame,
         useNegative: Union[bool, Sequence[bool]] = False,
-        reverse: Union[bool, Sequence[bool]] = False,
+        reverse: Union[bool, int, Sequence[Union[bool, int]]] = False,
         aggFunc: str = "sum",
     ):
         """
@@ -169,7 +170,7 @@ class Structure(object):
 
     def flowEvents(
         self,
-        interEvent: float = 6,
+        inter_event_period: float = 6,
         thresholdFlow: float = 0.01,
         useNegativeFlow: Union[bool, Sequence[bool]] = False,
         reverseFlow: Union[bool, Sequence[bool]] = False,
@@ -180,7 +181,7 @@ class Structure(object):
 
         Parameters
         ----------
-        interEvent : float, optional
+        inter_event_period : float, optional
             The period in hours of flow less than or equal to thresholdFlow that demarks
             flow events, default to 6
         thresholdFlow : float, optional
@@ -200,25 +201,25 @@ class Structure(object):
         # pull aggregated series
         series = self._aggSeries(self.flowFrame, useNegativeFlow, reverseFlow)
 
-        # put series in DataFrame, and add eventNum column
-        q = pd.DataFrame(
+        # put series in DataFrame, and add event_num column
+        q = DataFrame(
             series[series > thresholdFlow], columns=["flow_rate"]
         ).reset_index()
-        q["eventNum"] = pd.NA
+        q["event_num"] = NA
         # initialize first event
-        q.loc[0, "eventNum"] = 1
+        q.loc[0, "event_num"] = 1
 
         # calculate period between flows greater than threshold
-        hours = q.datetime.diff(1) / hourUnit
+        hours = q.datetime.diff(1) / hour_unit
 
         # slice out times demarking a new event
         # assign event numbers to those starting points
-        slicer = hours > interEvent
-        q.loc[slicer, "eventNum"] = range(2, sum(slicer) + 2)
-        q.eventNum.fillna(method="ffill", inplace=True)
+        slicer = hours > inter_event_period
+        q.loc[slicer, "event_num"] = range(2, sum(slicer) + 2)
+        q.event_num.fillna(method="ffill", inplace=True)
 
-        # group by eventNum
-        gpd = q.groupby("eventNum")
+        # group by event_num
+        gpd = q.groupby("event_num")
 
         # find indices of max flow timesteps in each event
         maxSer = gpd.flow_rate.idxmax()
@@ -227,30 +228,28 @@ class Structure(object):
         vol = (
             gpd.flow_rate.sum()
             * self.out.report
-            * volumeConstants.get(self.out.units[1]).get("multiplier")
+            * volumeConstants[self.out.units[1]]["multiplier"]
         )
 
         # add unit name to column
-        vol.name = (
-            f"totalVolume_{volumeConstants.get(self.out.units[1]).get('volumeUnits')}"
-        )
+        vol.name = f"totalVolume_{volumeConstants[self.out.units[1]]['volumeUnits']}"
 
         # calculate the duration of each event in hours
         durations = (gpd.datetime.count() * self.out.report) / 60 / 60
-        durations.name = "hoursDuration"
+        durations.name = "hours_duration"
 
         # join in event volumes and durations with event maxima
         return (
             q.loc[maxSer]
-            .join(vol, on="eventNum")
-            .join(durations, on="eventNum")
+            .join(vol, on="event_num")
+            .join(durations, on="event_num")
             .rename({"flow_rate": "maxFlow", "datetime": "time_of_maxFlow"}, axis=1)
-            .set_index("eventNum")
+            .set_index("event_num")
         )
 
     def floodEvents(
         self,
-        interEvent: float = 6,
+        inter_event_period: float = 6,
         thresholdFood: float = 0.01,
     ):
         """
@@ -261,7 +260,7 @@ class Structure(object):
 
         Parameters
         ----------
-        interEvent : float, optionalep
+        inter_event_period : float, optionalep
             The period in hours of flooding less than or equal to thresholdFlood that demarks
             flow events, default to 6
         thresholdFood : float, optional
@@ -275,41 +274,41 @@ class Structure(object):
         """
         series = self._aggSeries(self.floodFrame)
 
-        # put series in DataFrame, and add eventNum column
-        q = pd.DataFrame(
+        # put series in DataFrame, and add event_num column
+        q = DataFrame(
             series[series > thresholdFood],
             columns=["flooding_losses"],
         ).reset_index()
-        q["eventNum"] = pd.NA
+        q["event_num"] = NA
         # initialize first event
-        q.loc[0, "eventNum"] = 1
+        q.loc[0, "event_num"] = 1
 
         # calculate period between flows greater than threshold
-        hours = q.datetime.diff(1) / hourUnit
+        hours = q.datetime.diff(1) / hour_unit
 
         # slice out times demarking a new event
         # assign event numbers to those starting points
-        slicer = hours > interEvent
-        q.loc[slicer, "eventNum"] = range(2, sum(slicer) + 2)
-        q.eventNum.fillna(method="ffill", inplace=True)
+        slicer = hours > inter_event_period
+        q.loc[slicer, "event_num"] = range(2, sum(slicer) + 2)
+        q.event_num.fillna(method="ffill", inplace=True)
 
-        # group by eventNum
-        gpd = q.groupby("eventNum")
+        # group by event_num
+        gpd = q.groupby("event_num")
 
         # find indices of max flow timesteps in each event
         maxSer = gpd.flooding_losses.idxmax()
 
         # calculate the duration of each event in hours
         durations = (gpd.datetime.count() * self.out.report) / 60 / 60
-        durations.name = "hoursDuration"
+        durations.name = "hours_duration"
 
         # return event maxima joined with durations
         return (
             q.loc[maxSer]
-            .join(durations, on="eventNum")
+            .join(durations, on="event_num")
             .rename(
                 {"flooding_losses": "maxFloodRate", "datetime": "time_of_maxFlow"},
                 axis=1,
             )
-            .set_index("eventNum")
+            .set_index("event_num")
         )

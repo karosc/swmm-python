@@ -11,4 +11,6 @@ black
 numpydoc
 nbsphinx
 pydata-sphinx-theme
+sphinx-rtd-theme
+matplotlib
 myst-parser

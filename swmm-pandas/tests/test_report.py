@@ -39,7 +39,8 @@ def test_analysis_options(rptfile):
                 "Head Tolerance": "0.005000 ft",
             }
         },
-    )
+    )["Setting"]
+    print(type(reference))
     reference.index.name = "Option"
     opts = rptfile.analysis_options
     assert all(opts.sort_index() == reference)

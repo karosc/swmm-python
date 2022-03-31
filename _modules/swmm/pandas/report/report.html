@@ -1,0 +1,1064 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  <meta name="lang:clipboard.copy" content="Copy to clipboard">
+  <meta name="lang:clipboard.copied" content="Copied to clipboard">
+  <meta name="lang:search.language" content="en">
+  <meta name="lang:search.pipeline.stopwords" content="True">
+  <meta name="lang:search.pipeline.trimmer" content="True">
+  <meta name="lang:search.result.none" content="No matching documents">
+  <meta name="lang:search.result.one" content="1 matching document">
+  <meta name="lang:search.result.other" content="# matching documents">
+  <meta name="lang:search.tokenizer" content="[\s\-]+">
+
+  
+    <link href="https://fonts.gstatic.com/" rel="preconnect" crossorigin>
+    <link href="https://fonts.googleapis.com/css?family=Roboto+Mono:400,500,700|Roboto:300,400,400i,700&display=fallback" rel="stylesheet">
+
+    <style>
+      body,
+      input {
+        font-family: "Roboto", "Helvetica Neue", Helvetica, Arial, sans-serif
+      }
+
+      code,
+      kbd,
+      pre {
+        font-family: "Roboto Mono", "Courier New", Courier, monospace
+      }
+    </style>
+  
+
+  <link rel="stylesheet" href="../../../../_static/stylesheets/application.css"/>
+  <link rel="stylesheet" href="../../../../_static/stylesheets/application-palette.css"/>
+  <link rel="stylesheet" href="../../../../_static/stylesheets/application-fixes.css"/>
+  
+  <link rel="stylesheet" href="../../../../_static/fonts/material-icons.css"/>
+  
+  <meta name="theme-color" content="red">
+  <script src="../../../../_static/javascripts/modernizr.js"></script>
+  
+  
+  
+    <title>swmm.pandas.report.report &#8212; swmm-pandas</title>
+    <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/material.css" />
+    <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
+    <script src="../../../../_static/jquery.js"></script>
+    <script src="../../../../_static/underscore.js"></script>
+    <script src="../../../../_static/doctools.js"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <link rel="shortcut icon" href="../../../../_static/favicon.png"/>
+    <link rel="search" title="Search" href="../../../../search.html" />
+  
+   
+
+  </head>
+  <body dir=ltr
+        data-md-color-primary=indigo data-md-color-accent=blue>
+  
+  <svg class="md-svg">
+    <defs data-children-count="0">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" width="416" height="448" viewBox="0 0 416 448" id="__github"><path fill="currentColor" d="M160 304q0 10-3.125 20.5t-10.75 19T128 352t-18.125-8.5-10.75-19T96 304t3.125-20.5 10.75-19T128 256t18.125 8.5 10.75 19T160 304zm160 0q0 10-3.125 20.5t-10.75 19T288 352t-18.125-8.5-10.75-19T256 304t3.125-20.5 10.75-19T288 256t18.125 8.5 10.75 19T320 304zm40 0q0-30-17.25-51T296 232q-10.25 0-48.75 5.25Q229.5 240 208 240t-39.25-2.75Q130.75 232 120 232q-29.5 0-46.75 21T56 304q0 22 8 38.375t20.25 25.75 30.5 15 35 7.375 37.25 1.75h42q20.5 0 37.25-1.75t35-7.375 30.5-15 20.25-25.75T360 304zm56-44q0 51.75-15.25 82.75-9.5 19.25-26.375 33.25t-35.25 21.5-42.5 11.875-42.875 5.5T212 416q-19.5 0-35.5-.75t-36.875-3.125-38.125-7.5-34.25-12.875T37 371.5t-21.5-28.75Q0 312 0 260q0-59.25 34-99-6.75-20.5-6.75-42.5 0-29 12.75-54.5 27 0 47.5 9.875t47.25 30.875Q171.5 96 212 96q37 0 70 8 26.25-20.5 46.75-30.25T376 64q12.75 25.5 12.75 54.5 0 21.75-6.75 42 34 40 34 99.5z"/></svg>
+      
+    </defs>
+  </svg>
+  
+  <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer">
+  <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search">
+  <label class="md-overlay" data-md-component="overlay" for="__drawer"></label>
+  <a href="#_modules/swmm/pandas/report/report" tabindex="1" class="md-skip"> Skip to content </a>
+  <header class="md-header" data-md-component="header">
+  <nav class="md-header-nav md-grid">
+    <div class="md-flex navheader">
+      <div class="md-flex__cell md-flex__cell--shrink">
+        <a href="../../../../index.html" title="swmm-pandas"
+           class="md-header-nav__button md-logo">
+          
+              <img src="../../../../_static/favicon.png" height="26"
+                   alt="swmm-pandas logo">
+          
+        </a>
+      </div>
+      <div class="md-flex__cell md-flex__cell--shrink">
+        <label class="md-icon md-icon--menu md-header-nav__button" for="__drawer"></label>
+      </div>
+      <div class="md-flex__cell md-flex__cell--stretch">
+        <div class="md-flex__ellipsis md-header-nav__title" data-md-component="title">
+          <span class="md-header-nav__topic">swmm-pandas 0.1.0</span>
+          <span class="md-header-nav__topic"> swmm.pandas.report.report </span>
+        </div>
+      </div>
+      <div class="md-flex__cell md-flex__cell--shrink">
+        <label class="md-icon md-icon--search md-header-nav__button" for="__search"></label>
+        
+<div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" action="../../../../search.html" method="get" name="search">
+      <input type="text" class="md-search__input" name="q" placeholder="Search"
+             autocapitalize="off" autocomplete="off" spellcheck="false"
+             data-md-component="query" data-md-state="active">
+      <label class="md-icon md-search__icon" for="__search"></label>
+      <button type="reset" class="md-icon md-search__icon" data-md-component="reset" tabindex="-1">
+        &#xE5CD;
+      </button>
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="result">
+          <div class="md-search-result__meta">
+            Type to start searching
+          </div>
+          <ol class="md-search-result__list"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+      </div>
+      
+        <div class="md-flex__cell md-flex__cell--shrink">
+          <div class="md-header-nav__source">
+            <a href="https://github.com/karosc/swmm-pandas/" title="Go to repository" class="md-source" data-md-source="github">
+
+    <div class="md-source__icon">
+      <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 24 24" width="28" height="28">
+        <use xlink:href="#__github" width="24" height="24"></use>
+      </svg>
+    </div>
+  
+  <div class="md-source__repository">
+    swmm-pandas
+  </div>
+</a>
+          </div>
+        </div>
+      
+      
+  
+  <script src="../../../../_static/javascripts/version_dropdown.js"></script>
+  <script>
+    var json_loc = "../../../../"versions.json"",
+        target_loc = "../../../../../",
+        text = "Versions";
+    $( document ).ready( add_version_dropdown(json_loc, target_loc, text));
+  </script>
+  
+
+    </div>
+  </nav>
+</header>
+
+  
+  <div class="md-container">
+    
+    
+    
+  <nav class="md-tabs" data-md-component="tabs">
+    <div class="md-tabs__inner md-grid">
+      <ul class="md-tabs__list">
+          <li class="md-tabs__item"><a href="../../../index.html" class="md-tabs__link">Module code</a></li>
+      </ul>
+    </div>
+  </nav>
+    <main class="md-main">
+      <div class="md-main__inner md-grid" data-md-component="container">
+        
+          <div class="md-sidebar md-sidebar--primary" data-md-component="navigation">
+            <div class="md-sidebar__scrollwrap">
+              <div class="md-sidebar__inner">
+                <nav class="md-nav md-nav--primary" data-md-level="0">
+  <label class="md-nav__title md-nav__title--site" for="__drawer">
+    <a href="../../../../index.html" title="swmm-pandas" class="md-nav__button md-logo">
+      
+        <img src="../../../../_static/favicon.png" alt=" logo" width="48" height="48">
+      
+    </a>
+    <a href="../../../../index.html"
+       title="swmm-pandas">swmm-pandas 0.1.0</a>
+  </label>
+    <div class="md-nav__source">
+      <a href="https://github.com/karosc/swmm-pandas/" title="Go to repository" class="md-source" data-md-source="github">
+
+    <div class="md-source__icon">
+      <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 24 24" width="28" height="28">
+        <use xlink:href="#__github" width="24" height="24"></use>
+      </svg>
+    </div>
+  
+  <div class="md-source__repository">
+    swmm-pandas
+  </div>
+</a>
+    </div>
+  
+  
+
+  
+  <ul class="md-nav__list">
+    <li class="md-nav__item">
+    
+    
+      <a href="../../../../installation.html" class="md-nav__link">Installation</a>
+      
+    
+    </li>
+    <li class="md-nav__item">
+    
+    
+      <a href="../../../../usage.html" class="md-nav__link">Usage</a>
+      
+    
+    </li>
+    <li class="md-nav__item">
+    
+    
+      <a href="../../../../reference/index.html" class="md-nav__link">API Reference</a>
+      
+    
+    </li>
+  </ul>
+  
+
+</nav>
+              </div>
+            </div>
+          </div>
+          <div class="md-sidebar md-sidebar--secondary" data-md-component="toc">
+            <div class="md-sidebar__scrollwrap">
+              <div class="md-sidebar__inner">
+                
+<nav class="md-nav md-nav--secondary">
+  <ul class="md-nav__list" data-md-scrollfix="">
+    
+
+<li id="searchbox" class="md-nav__item"></li>
+
+  </ul>
+</nav>
+              </div>
+            </div>
+          </div>
+        
+        <div class="md-content">
+          <article class="md-content__inner md-typeset" role="main">
+            
+  <h1 id="modules-swmm-pandas-report-report--page-root">Source code for swmm.pandas.report.report</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">from</span> <span class="nn">io</span> <span class="kn">import</span> <span class="n">StringIO</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">Tuple</span>
+
+<span class="kn">from</span> <span class="nn">pandas.core.api</span> <span class="kn">import</span> <span class="n">DataFrame</span><span class="p">,</span> <span class="n">Timestamp</span><span class="p">,</span> <span class="n">to_datetime</span><span class="p">,</span> <span class="n">to_timedelta</span><span class="p">,</span> <span class="n">Series</span>
+<span class="kn">from</span> <span class="nn">pandas.io.parsers</span> <span class="kn">import</span> <span class="n">read_csv</span><span class="p">,</span> <span class="n">read_fwf</span>
+
+
+<div class="viewcode-block" id="Report"><a class="viewcode-back" href="../../../../reference/report/index.html#swmm.pandas.Report">[docs]</a><span class="k">class</span> <span class="nc">Report</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="n">_rptfile</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="sd">"""path to swmm rpt file"""</span>
+
+    <span class="n">_rpt_text</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="sd">"""text string of rpt file contents"""</span>
+
+    <span class="n">_sections</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span>
+    <span class="sd">"""dictionary of SWMM report sections as {section name : section text}"""</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rptfile</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="sd">"""Base class for a SWMM simulation report file.</span>
+
+<span class="sd">        The report object provides an api for the tables in the the SWMM</span>
+<span class="sd">        simulation report file. Tables are access as properties of the object</span>
+<span class="sd">        and returned as pandas DataFrames.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        rptfile : str</span>
+<span class="sd">            model report file path</span>
+<span class="sd">        """</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_rptfile</span> <span class="o">=</span> <span class="n">rptfile</span>
+
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">rptfile</span><span class="p">,</span> <span class="s2">"r"</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_rpt_text</span> <span class="o">=</span> <span class="n">file</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_sections</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_find_title</span><span class="p">(</span><span class="n">section</span><span class="p">):</span> <span class="n">section</span>
+            <span class="k">for</span> <span class="n">section</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_find_sections</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_rpt_text</span><span class="p">)</span>
+        <span class="p">}</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_find_sections</span><span class="p">(</span><span class="n">rpt_text</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+        <span class="sa">r</span><span class="sd">"""</span>
+<span class="sd">        Function to split the report file text into separate sections using a regex</span>
+<span class="sd">        pattern match:</span>
+
+<span class="sd">        "^\s+$\s+(?=\*|A)": pattern matches blank lines followed by at least</span>
+<span class="sd">        1 white space followed by a lookhead for a asterisk (demarks section headers)</span>
+<span class="sd">        or the letter A (looks for the word Analysis at the end of the report file)</span>
+
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        rpt_text : str</span>
+<span class="sd">            Text content of the report file</span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        List[str]</span>
+<span class="sd">            A list section texts</span>
+<span class="sd">        """</span>
+        <span class="c1"># pattern to match blank lines preceding a line of asterisks</span>
+        <span class="n">section_pattern</span> <span class="o">=</span> <span class="sa">R</span><span class="s2">"^\s+$\s+(?=\*|A)"</span>
+        <span class="n">section_comp</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="n">section_pattern</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">MULTILINE</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">list</span><span class="p">(</span>
+            <span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">  "</span><span class="p">,</span> <span class="s2">"</span><span class="se">\n</span><span class="s2">"</span><span class="p">),</span> <span class="n">section_comp</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">rpt_text</span><span class="p">)[</span><span class="mi">2</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+        <span class="p">)</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_find_title</span><span class="p">(</span><span class="n">section</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="sa">r</span><span class="sd">"""</span>
+<span class="sd">        Function to extract the title of section produced by _find_sections using</span>
+<span class="sd">        regex to match lines between two lines of asterisks.</span>
+
+<span class="sd">        "^\*+[\s\S]*?\n([\s\S]*?)\s*\*+": Pattern matches any number white space or non-white</span>
+<span class="sd">        space characters that are between:</span>
+<span class="sd">            1. A line starting with a string of asterisks followed by any white space or</span>
+<span class="sd">               non-whitespace chacter and ending with a new line break</span>
+<span class="sd">            2. A line starting with a string of asterisks</span>
+
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        section : str</span>
+<span class="sd">            The section text produced by _find_sections</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        str</span>
+<span class="sd">            Title of section</span>
+
+<span class="sd">        Raises</span>
+<span class="sd">        ------</span>
+<span class="sd">        Exception</span>
+<span class="sd">            If regex could not find a match</span>
+<span class="sd">        """</span>
+        <span class="c1"># pattern to match line between two lines of asterisks</span>
+        <span class="n">title_pattern</span> <span class="o">=</span> <span class="sa">R</span><span class="s2">"^\*+[\s\S]*?\n([\s\S]*?)\s*\*+"</span>
+        <span class="n">title_comp</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="n">title_pattern</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">MULTILINE</span><span class="p">)</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="n">title_comp</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">section</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">s</span><span class="p">:</span>
+            <span class="c1"># if string is found, split line on more two consecutive spaces and pull the first token</span>
+            <span class="k">return</span> <span class="n">s</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">"  "</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Error finding title for section</span><span class="se">\n</span><span class="si">{</span><span class="n">section</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_split_section</span><span class="p">(</span><span class="n">section</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
+        <span class="sd">"""</span>
+<span class="sd">        Function to split a report section into header and data elements. Relies on regex</span>
+<span class="sd">        matching lines with consecutive dashes indicating header lines.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        section : str</span>
+<span class="sd">            The section text produced by _find_sections</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        Tuple[str, str]</span>
+<span class="sd">            header text and data text</span>
+
+<span class="sd">        Raises</span>
+<span class="sd">        ------</span>
+<span class="sd">        Exception</span>
+<span class="sd">            If regex could not find a match</span>
+<span class="sd">        """</span>
+        <span class="n">title</span> <span class="o">=</span> <span class="n">Report</span><span class="o">.</span><span class="n">_find_title</span><span class="p">(</span><span class="n">section</span><span class="p">)</span>
+        <span class="n">subsections</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="sa">R</span><span class="s2">"\s*-+\n"</span><span class="p">,</span> <span class="n">section</span><span class="p">)</span>
+        <span class="n">num_subsections</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">subsections</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">num_subsections</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">header</span> <span class="o">=</span> <span class="s2">"Result"</span>
+            <span class="c1"># split section on line of asterisks</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="sa">R</span><span class="s2">"\*+"</span><span class="p">,</span> <span class="n">section</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+        <span class="k">elif</span> <span class="n">num_subsections</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="n">header</span><span class="p">,</span> <span class="n">data</span> <span class="o">=</span> <span class="n">subsections</span>
+
+        <span class="k">elif</span> <span class="n">num_subsections</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+            <span class="n">notes</span><span class="p">,</span> <span class="n">header</span><span class="p">,</span> <span class="n">data</span> <span class="o">=</span> <span class="n">subsections</span>
+
+        <span class="k">elif</span> <span class="n">num_subsections</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
+            <span class="n">notes</span><span class="p">,</span> <span class="n">header</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">sytem</span> <span class="o">=</span> <span class="n">subsections</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Error parsing table </span><span class="si">{</span><span class="n">title</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">header</span><span class="p">,</span> <span class="n">data</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_parse_header</span><span class="p">(</span><span class="n">header</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+        <span class="sd">"""</span>
+<span class="sd">        Parse header line produced from _split_section into list of column headers. Uses pandas</span>
+<span class="sd">        read_fwf to automatically parse multi line headers present in report file.</span>
+
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        header : str</span>
+<span class="sd">            Header text string produced from _split_section</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        List[str]</span>
+<span class="sd">            List of column headers</span>
+<span class="sd">        """</span>
+
+        <span class="c1"># substitute single spaces between words with underscores</span>
+        <span class="c1"># replace asterisks or dashes with spaces</span>
+        <span class="n">header</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">R</span><span class="s2">"(?&lt;=\w)[^\S\r\n](?=\w)"</span><span class="p">,</span> <span class="s2">"_"</span><span class="p">,</span> <span class="n">field</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">dropna</span><span class="p">()</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">cat</span><span class="p">(</span><span class="n">sep</span><span class="o">=</span><span class="s2">"_"</span><span class="p">))</span>
+            <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">read_fwf</span><span class="p">(</span>
+                <span class="n">StringIO</span><span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">R</span><span class="s2">"\*|-"</span><span class="p">,</span> <span class="s2">" "</span><span class="p">,</span> <span class="n">header</span><span class="p">)),</span> <span class="n">header</span><span class="o">=</span><span class="kc">None</span>
+            <span class="p">)</span><span class="o">.</span><span class="n">iteritems</span><span class="p">()</span>
+        <span class="p">]</span>
+
+        <span class="c1"># split day and time into separate fields to be recombined in to datetime object</span>
+        <span class="c1"># when parsing table</span>
+        <span class="k">if</span> <span class="s2">"Time_of_Max_Occurrence_days_hr:min"</span> <span class="ow">in</span> <span class="n">header</span><span class="p">:</span>
+            <span class="n">max_idx</span> <span class="o">=</span> <span class="n">header</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="s2">"Time_of_Max_Occurrence_days_hr:min"</span><span class="p">)</span>
+            <span class="n">header</span><span class="p">[</span><span class="n">max_idx</span><span class="p">]</span> <span class="o">=</span> <span class="s2">"days"</span>
+            <span class="n">header</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">max_idx</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">"Time_of_Max"</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">header</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_parse_table</span><span class="p">(</span>
+        <span class="n">header</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">data</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">sep</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="sa">R</span><span class="s2">"\s{2,}|\s:\s"</span><span class="p">,</span> <span class="n">index_col</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DataFrame</span><span class="p">:</span>
+        <span class="sa">r</span><span class="sd">"""</span>
+<span class="sd">        Function to parse data string produced from _split_section into pandas DataFrame</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        header : Sequence[str]</span>
+<span class="sd">            Sequence of column names to assign to DataFrame. Mostly can be produced from _parse_header.</span>
+<span class="sd">        data : str</span>
+<span class="sd">            Data string produced form _split_section</span>
+<span class="sd">        sep : str, optional</span>
+<span class="sd">            Delimeter to be fed into pandas read_csv function that operates on data string</span>
+<span class="sd">            , by default R"\s{2,}|\s:\s"</span>
+<span class="sd">        index_col : int, optional</span>
+<span class="sd">            Column in data to be used as DataFrame index, by default 0</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        pd.DataFrame</span>
+<span class="sd">            Report data table</span>
+<span class="sd">        """</span>
+
+        <span class="c1"># remove leading spaces on each line and replace long runs of periods with spaces</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">R</span><span class="s2">"^\s+"</span><span class="p">,</span> <span class="s2">""</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">R</span><span class="s2">"\.{2,}"</span><span class="p">,</span> <span class="s2">"  "</span><span class="p">,</span> <span class="n">data</span><span class="p">),</span> <span class="n">flags</span><span class="o">=</span><span class="n">re</span><span class="o">.</span><span class="n">MULTILINE</span><span class="p">)</span>
+
+        <span class="c1"># by default read in data with minimum 2-spaces or semicolon flanked by spaces as delimiter</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">read_csv</span><span class="p">(</span>
+            <span class="n">StringIO</span><span class="p">(</span><span class="n">data</span><span class="p">),</span>
+            <span class="n">header</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">engine</span><span class="o">=</span><span class="s2">"python"</span><span class="p">,</span>
+            <span class="n">sep</span><span class="o">=</span><span class="n">sep</span><span class="p">,</span>
+            <span class="n">index_col</span><span class="o">=</span><span class="n">index_col</span><span class="p">,</span>
+            <span class="n">names</span><span class="o">=</span><span class="n">header</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="c1"># convert day and time columns into a single datetime column</span>
+        <span class="k">if</span> <span class="s2">"Time_of_Max"</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+
+            <span class="c1"># convert time of max to timedelta</span>
+            <span class="n">df</span><span class="p">[</span><span class="s2">"Time_of_Max"</span><span class="p">]</span> <span class="o">=</span> <span class="n">to_timedelta</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">"days"</span><span class="p">),</span> <span class="n">unit</span><span class="o">=</span><span class="s2">"D"</span><span class="p">)</span> <span class="o">+</span> <span class="n">to_timedelta</span><span class="p">(</span>
+                <span class="n">df</span><span class="p">[</span><span class="s2">"Time_of_Max"</span><span class="p">]</span> <span class="o">+</span> <span class="s2">":00"</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="n">df</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">analysis_options</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Series</span><span class="p">:</span>
+        <span class="sd">"""</span>
+<span class="sd">        Pandas series containing the analysis options listed in the</span>
+<span class="sd">        report file including units, models, methods, dates, time steps, etc.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        Series</span>
+<span class="sd">            Series of options.</span>
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">"_analysis_options"</span><span class="p">):</span>
+            <span class="n">header</span><span class="p">,</span> <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_split_section</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_sections</span><span class="p">[</span><span class="s2">"Analysis Options"</span><span class="p">])</span>
+            <span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parse_table</span><span class="p">([</span><span class="s2">"Option"</span><span class="p">,</span> <span class="s2">"Setting"</span><span class="p">],</span> <span class="n">data</span><span class="p">)[</span><span class="s2">"Setting"</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_analysis_options</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">dropna</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_analysis_options</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">runoff_quantity_continuity</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DataFrame</span><span class="p">:</span>
+        <span class="sd">"""</span>
+<span class="sd">        Runoff quantity continuity error table in volume and depth units.</span>
+<span class="sd">        System wide error is show in percent.</span>
+
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        pd.DataFrame</span>
+<span class="sd">            DataFrame of runoff quantity continuity error table.</span>
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">"_runoff_quantity_continuity"</span><span class="p">):</span>
+            <span class="n">header</span><span class="p">,</span> <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_split_section</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_sections</span><span class="p">[</span><span class="s2">"Runoff Quantity Continuity"</span><span class="p">]</span>
+            <span class="p">)</span>
+            <span class="c1"># substitute spaces between words with underscore so read_fwf works</span>
+            <span class="c1"># had to use some  regex to not also match new lines</span>
+            <span class="n">header</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parse_header</span><span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">R</span><span class="s2">"(?&lt;=\w)[^\S\r\n](?=\w)"</span><span class="p">,</span> <span class="s2">"_"</span><span class="p">,</span> <span class="n">header</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_runoff_quantity_continuity</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parse_table</span><span class="p">(</span><span class="n">header</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_runoff_quantity_continuity</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">runoff_quality_continuity</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DataFrame</span><span class="p">:</span>
+        <span class="sd">"""</span>
+<span class="sd">        Runoff quality continuity error table in mass units for each pollutant.</span>
+<span class="sd">        System wide error is show in percent.</span>
+
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        pd.DataFrame</span>
+<span class="sd">            DataFrame of runoff quality continuity error table</span>
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">"_runoff_quality_continuity"</span><span class="p">):</span>
+            <span class="n">header</span><span class="p">,</span> <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_split_section</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_sections</span><span class="p">[</span><span class="s2">"Runoff Quality Continuity"</span><span class="p">]</span>
+            <span class="p">)</span>
+            <span class="c1"># substitute spaces between words with underscore so read_fwf works</span>
+            <span class="c1"># had to use some  regex to not also match new lines</span>
+            <span class="n">header</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parse_header</span><span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">R</span><span class="s2">"(?&lt;=\w)[^\S\r\n](?=\w)"</span><span class="p">,</span> <span class="s2">"_"</span><span class="p">,</span> <span class="n">header</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_runoff_quality_continuity</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parse_table</span><span class="p">(</span><span class="n">header</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_runoff_quality_continuity</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">groundwater_continuity</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DataFrame</span><span class="p">:</span>
+        <span class="sd">"""</span>
+<span class="sd">        Groundwater quantity continuity error table in volume and depth units.</span>
+<span class="sd">        System wide error is show in percent.</span>
+
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        pd.DataFrame</span>
+<span class="sd">            DataFrame of groundwater quantity continuity error table</span>
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">"_groundwater_continuity"</span><span class="p">):</span>
+            <span class="n">header</span><span class="p">,</span> <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_split_section</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_sections</span><span class="p">[</span><span class="s2">"Groundwater Continuity"</span><span class="p">])</span>
+            <span class="c1"># substitute spaces between words with underscore so read_fwf works</span>
+            <span class="c1"># had to use some  regex to not also match new lines</span>
+            <span class="n">header</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parse_header</span><span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">R</span><span class="s2">"(?&lt;=\w)[^\S\r\n](?=\w)"</span><span class="p">,</span> <span class="s2">"_"</span><span class="p">,</span> <span class="n">header</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_groundwater_continuity</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parse_table</span><span class="p">(</span><span class="n">header</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_groundwater_continuity</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">flow_routing_continuity</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DataFrame</span><span class="p">:</span>
+        <span class="sd">"""</span>
+<span class="sd">        Flow routing continuity error table in volume units.</span>
+<span class="sd">        System wide error is show in percent.</span>
+
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        pd.DataFrame</span>
+<span class="sd">            DataFrame of flow routing continuity error table</span>
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">"_flow_routing_continuity"</span><span class="p">):</span>
+            <span class="n">header</span><span class="p">,</span> <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_split_section</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_sections</span><span class="p">[</span><span class="s2">"Flow Routing Continuity"</span><span class="p">]</span>
+            <span class="p">)</span>
+            <span class="c1"># substitute spaces between words with underscore so read_fwf works</span>
+            <span class="c1"># had to use some  regex to not also match new lines</span>
+            <span class="n">header</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parse_header</span><span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">R</span><span class="s2">"(?&lt;=\w)[^\S\r\n](?=\w)"</span><span class="p">,</span> <span class="s2">"_"</span><span class="p">,</span> <span class="n">header</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_flow_routing_continuity</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parse_table</span><span class="p">(</span><span class="n">header</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_flow_routing_continuity</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">quality_routing_continuity</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DataFrame</span><span class="p">:</span>
+        <span class="sd">"""</span>
+<span class="sd">        Quality routing continuity error table in mass units.</span>
+<span class="sd">        System wide error is show in percent.</span>
+
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        pd.DataFrame</span>
+<span class="sd">            DataFrame of quality routing continuity error table</span>
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">"_quality_routing_continuity"</span><span class="p">):</span>
+            <span class="n">header</span><span class="p">,</span> <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_split_section</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_sections</span><span class="p">[</span><span class="s2">"Quality Routing Continuity"</span><span class="p">]</span>
+            <span class="p">)</span>
+            <span class="c1"># substitute spaces between words with underscore so read_fwf works</span>
+            <span class="c1"># had to use some  regex to not also match new lines</span>
+            <span class="n">header</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parse_header</span><span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">R</span><span class="s2">"(?&lt;=\w)[^\S\r\n](?=\w)"</span><span class="p">,</span> <span class="s2">"_"</span><span class="p">,</span> <span class="n">header</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_quality_routing_continuity</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parse_table</span><span class="p">(</span><span class="n">header</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_quality_routing_continuity</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">highest_continuity_errors</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DataFrame</span><span class="p">:</span>
+        <span class="sd">"""</span>
+<span class="sd">        Highest continuity error table in percent.</span>
+<span class="sd">        This table shows the model elements with the highest</span>
+<span class="sd">        flow routing continuity error.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        pd.DataFrame</span>
+<span class="sd">            DataFrame of highest continuity errors table</span>
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">"_highest_errors"</span><span class="p">):</span>
+            <span class="n">header</span><span class="p">,</span> <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_split_section</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_sections</span><span class="p">[</span><span class="s2">"Highest Continuity Errors"</span><span class="p">]</span>
+            <span class="p">)</span>
+            <span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parse_table</span><span class="p">(</span>
+                <span class="p">[</span><span class="s2">"object_type"</span><span class="p">,</span> <span class="s2">"name"</span><span class="p">,</span> <span class="s2">"percent_error"</span><span class="p">],</span> <span class="n">data</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="sa">R</span><span class="s2">"\s+"</span><span class="p">,</span> <span class="n">index_col</span><span class="o">=</span><span class="mi">1</span>
+            <span class="p">)</span>
+            <span class="n">df</span><span class="p">[</span><span class="s2">"percent_error"</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s2">"percent_error"</span><span class="p">]</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s2">"()%"</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_highest_errors</span> <span class="o">=</span> <span class="n">df</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_highest_errors</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">time_step_critical_elements</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DataFrame</span><span class="p">:</span>
+        <span class="sd">"""</span>
+<span class="sd">        Time-step critical elements table in percent.</span>
+<span class="sd">        This table shows the model elements that were controlling</span>
+<span class="sd">        the model time step if a variable one was used.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        pd.DataFrame</span>
+<span class="sd">            DataFrame of time-step critical elements table</span>
+<span class="sd">        """</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">"_ts_critical"</span><span class="p">):</span>
+            <span class="n">header</span><span class="p">,</span> <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_split_section</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_sections</span><span class="p">[</span><span class="s2">"Time-Step Critical Elements"</span><span class="p">]</span>
+            <span class="p">)</span>
+            <span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parse_table</span><span class="p">(</span>
+                <span class="p">[</span><span class="s2">"object_type"</span><span class="p">,</span> <span class="s2">"name"</span><span class="p">,</span> <span class="s2">"percent"</span><span class="p">],</span> <span class="n">data</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="sa">R</span><span class="s2">"\s+"</span><span class="p">,</span> <span class="n">index_col</span><span class="o">=</span><span class="mi">1</span>
+            <span class="p">)</span>
+            <span class="n">df</span><span class="p">[</span><span class="s2">"percent"</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s2">"percent"</span><span class="p">]</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s2">"()%"</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_ts_critical</span> <span class="o">=</span> <span class="n">df</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ts_critical</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">highest_flow_instability_indexes</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DataFrame</span><span class="p">:</span>
+        <span class="sd">"""</span>
+<span class="sd">        Highest flow instability indexes.</span>
+<span class="sd">        This table shows the model elements that have the highest</span>
+<span class="sd">        flow instability.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        pd.DataFrame</span>
+<span class="sd">            DataFrame of highest flow instability indexes table</span>
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">"_highest_flow_instability_indexes"</span><span class="p">):</span>
+            <span class="n">header</span><span class="p">,</span> <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_split_section</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_sections</span><span class="p">[</span><span class="s2">"Highest Flow Instability Indexes"</span><span class="p">]</span>
+            <span class="p">)</span>
+            <span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parse_table</span><span class="p">(</span>
+                <span class="p">[</span><span class="s2">"object_type"</span><span class="p">,</span> <span class="s2">"name"</span><span class="p">,</span> <span class="s2">"index"</span><span class="p">],</span> <span class="n">data</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="sa">R</span><span class="s2">"\s+"</span><span class="p">,</span> <span class="n">index_col</span><span class="o">=</span><span class="mi">1</span>
+            <span class="p">)</span>
+            <span class="n">df</span><span class="p">[</span><span class="s2">"index"</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s2">"index"</span><span class="p">]</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s2">"()"</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_highest_flow_instability_indexes</span> <span class="o">=</span> <span class="n">df</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_highest_flow_instability_indexes</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">routing_time_step_summary</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DataFrame</span><span class="p">:</span>
+        <span class="sd">"""</span>
+<span class="sd">        Routing time step summary table that shows the average, minimum,</span>
+<span class="sd">        and maximum time steps as well as convergance summary.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        pd.DataFrame</span>
+<span class="sd">            DataFrame of routing time step summary table</span>
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">"_routing_time_step_summary"</span><span class="p">):</span>
+            <span class="n">header</span><span class="p">,</span> <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_split_section</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_sections</span><span class="p">[</span><span class="s2">"Routing Time Step Summary"</span><span class="p">]</span>
+            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_routing_time_step_summary</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parse_table</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_parse_header</span><span class="p">(</span><span class="n">header</span><span class="p">),</span> <span class="n">data</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="sa">R</span><span class="s2">"\s+:\s+"</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_routing_time_step_summary</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">runoff_summary</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DataFrame</span><span class="p">:</span>
+        <span class="sd">"""</span>
+<span class="sd">        Runoff summary table for each subcatchment that details rainfall,</span>
+<span class="sd">        runon, evap, infil, and runoff.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        pd.DataFrame</span>
+<span class="sd">            DataFrame of subcatchment runoff summary table</span>
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">"_runoff_summary"</span><span class="p">):</span>
+            <span class="n">header</span><span class="p">,</span> <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_split_section</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_sections</span><span class="p">[</span><span class="s2">"Subcatchment Runoff Summary"</span><span class="p">]</span>
+            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_runoff_summary</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parse_table</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_parse_header</span><span class="p">(</span><span class="n">header</span><span class="p">),</span> <span class="n">data</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_runoff_summary</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">groundwater_summary</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DataFrame</span><span class="p">:</span>
+        <span class="sd">"""</span>
+<span class="sd">        Groundwater summary table for each subcatchment that details groundwater</span>
+<span class="sd">        inflow, outflow, moisture, and water table.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        pd.DataFrame</span>
+<span class="sd">            DataFrame of subcatchment groundwater summary table</span>
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">"_groundwater_summary"</span><span class="p">):</span>
+            <span class="n">header</span><span class="p">,</span> <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_split_section</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_sections</span><span class="p">[</span><span class="s2">"Groundwater Summary"</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_groundwater_summary</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parse_table</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_parse_header</span><span class="p">(</span><span class="n">header</span><span class="p">),</span> <span class="n">data</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_groundwater_summary</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">washoff_summary</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DataFrame</span><span class="p">:</span>
+        <span class="sd">"""</span>
+<span class="sd">        Washoff summary table that details the total pollutant load</span>
+<span class="sd">        that was washed off of each subcatchment.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        pd.DataFrame</span>
+<span class="sd">            DataFrame of subcatchment washoff summary table</span>
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">"_washoff_summary"</span><span class="p">):</span>
+            <span class="n">header</span><span class="p">,</span> <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_split_section</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_sections</span><span class="p">[</span><span class="s2">"Subcatchment Washoff Summary"</span><span class="p">]</span>
+            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_washoff_summary</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parse_table</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_parse_header</span><span class="p">(</span><span class="n">header</span><span class="p">),</span> <span class="n">data</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_washoff_summary</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">node_depth_summary</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DataFrame</span><span class="p">:</span>
+        <span class="sd">"""</span>
+<span class="sd">        Node depth summary table that details the average and maximum</span>
+<span class="sd">        depth and HGL simulated for each node.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        pd.DataFrame</span>
+<span class="sd">            DataFrame of node depth summary table</span>
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">"_node_depth_summary"</span><span class="p">):</span>
+            <span class="n">header</span><span class="p">,</span> <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_split_section</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_sections</span><span class="p">[</span><span class="s2">"Node Depth Summary"</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_node_depth_summary</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parse_table</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_parse_header</span><span class="p">(</span><span class="n">header</span><span class="p">),</span> <span class="n">data</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_node_depth_summary</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">node_inflow_summary</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DataFrame</span><span class="p">:</span>
+        <span class="sd">"""</span>
+<span class="sd">        Node inflow summary table that details the maximum inflow rates, total</span>
+<span class="sd">        inflow volumes, and flow balance error percent for each node.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        pd.DataFrame</span>
+<span class="sd">            DataFrame of node inflow summary table</span>
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">"_node_inflow_summary"</span><span class="p">):</span>
+            <span class="n">header</span><span class="p">,</span> <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_split_section</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_sections</span><span class="p">[</span><span class="s2">"Node Inflow Summary"</span><span class="p">])</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">_node_inflow_summary</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parse_table</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_parse_header</span><span class="p">(</span><span class="n">header</span><span class="p">),</span> <span class="n">data</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_node_inflow_summary</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">node_surchage_summary</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DataFrame</span><span class="p">:</span>
+        <span class="sd">"""</span>
+<span class="sd">        Node surcharge summary that details the maximum surcharge level and duration</span>
+<span class="sd">        of surharge for each node.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        pd.DataFrame</span>
+<span class="sd">            DataFrame of node surcharge summary table</span>
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">"_node_surcharge_summary"</span><span class="p">):</span>
+            <span class="n">header</span><span class="p">,</span> <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_split_section</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_sections</span><span class="p">[</span><span class="s2">"Node Surcharge Summary"</span><span class="p">])</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">_node_surcharge_summary</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parse_table</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_parse_header</span><span class="p">(</span><span class="n">header</span><span class="p">),</span> <span class="n">data</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_node_surcharge_summary</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">node_flooding_summary</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DataFrame</span><span class="p">:</span>
+        <span class="sd">"""</span>
+<span class="sd">        Node flood summary that details the maximum ponded depth, peak flooding rate, total flood volume,</span>
+<span class="sd">        total flood duration for each node.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        pd.DataFrame</span>
+<span class="sd">            DataFrame of node flooding summary table</span>
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">"_node_flooding_summary"</span><span class="p">):</span>
+            <span class="n">header</span><span class="p">,</span> <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_split_section</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_sections</span><span class="p">[</span><span class="s2">"Node Flooding Summary"</span><span class="p">])</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">_node_flooding_summary</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parse_table</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_parse_header</span><span class="p">(</span><span class="n">header</span><span class="p">),</span> <span class="n">data</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_node_flooding_summary</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">storage_volume_summary</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DataFrame</span><span class="p">:</span>
+        <span class="sd">"""</span>
+<span class="sd">        Storage volume summary that details the frequency of filling, average and peak volumes,</span>
+<span class="sd">        losses, and outfall rate for each storage unit.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        pd.DataFrame</span>
+<span class="sd">            DataFrame of storage volume summary table</span>
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">"_storage_volume_summary"</span><span class="p">):</span>
+            <span class="n">header</span><span class="p">,</span> <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_split_section</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_sections</span><span class="p">[</span><span class="s2">"Storage Volume Summary"</span><span class="p">])</span>
+            <span class="n">header</span> <span class="o">=</span> <span class="n">header</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">"Storage Unit"</span><span class="p">,</span> <span class="s2">"Storage     "</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_storage_volume_summary</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parse_table</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_parse_header</span><span class="p">(</span><span class="n">header</span><span class="p">),</span> <span class="n">data</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_storage_volume_summary</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">outfall_loading_summary</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DataFrame</span><span class="p">:</span>
+        <span class="sd">"""</span>
+<span class="sd">        Outfall loading summary that details the flow frequency, average and peak flow rates,</span>
+<span class="sd">        total outflow volume, and pollutant mass loads for each outfall.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        pd.DataFrame</span>
+<span class="sd">            DataFrame of outfall loading summary table</span>
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">"_outfall_loading_summary"</span><span class="p">):</span>
+            <span class="n">header</span><span class="p">,</span> <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_split_section</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_sections</span><span class="p">[</span><span class="s2">"Outfall Loading Summary"</span><span class="p">]</span>
+            <span class="p">)</span>
+            <span class="n">header</span> <span class="o">=</span> <span class="n">header</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">"Outfall Node"</span><span class="p">,</span> <span class="s2">"Outfall     "</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_outfall_loading_summary</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parse_table</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_parse_header</span><span class="p">(</span><span class="n">header</span><span class="p">),</span> <span class="n">data</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_outfall_loading_summary</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">link_flow_summary</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DataFrame</span><span class="p">:</span>
+        <span class="sd">"""</span>
+<span class="sd">        Link flow summary that details the peak flow, velocity, depth, and capacity for each link.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        pd.DataFrame</span>
+<span class="sd">            DataFrame of link flow summary table</span>
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">"_link_flow_summary"</span><span class="p">):</span>
+            <span class="n">header</span><span class="p">,</span> <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_split_section</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_sections</span><span class="p">[</span><span class="s2">"Link Flow Summary"</span><span class="p">])</span>
+            <span class="n">header</span> <span class="o">=</span> <span class="n">header</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">"|"</span><span class="p">,</span> <span class="s2">" "</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_link_flow_summary</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parse_table</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_parse_header</span><span class="p">(</span><span class="n">header</span><span class="p">),</span> <span class="n">data</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_link_flow_summary</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">flow_classification_summary</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DataFrame</span><span class="p">:</span>
+        <span class="sd">"""</span>
+<span class="sd">        Flow classification summary that details the amount of conduit lengthening during</span>
+<span class="sd">        the simualtion and the fraction of simulation time that is dry, subcritical, supercritical,</span>
+<span class="sd">        or critical flow for each conduit.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        pd.DataFrame</span>
+<span class="sd">            DataFrame of flow classification summary table</span>
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">"_flow_classification_summary"</span><span class="p">):</span>
+            <span class="n">header</span><span class="p">,</span> <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_split_section</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_sections</span><span class="p">[</span><span class="s2">"Flow Classification Summary"</span><span class="p">]</span>
+            <span class="p">)</span>
+            <span class="n">to_remove</span> <span class="o">=</span> <span class="s2">"---------- Fraction of Time in Flow Class ----------"</span>
+            <span class="n">to_replace</span> <span class="o">=</span> <span class="s2">"                                                    "</span>
+            <span class="n">header</span> <span class="o">=</span> <span class="n">header</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">to_remove</span><span class="p">,</span> <span class="n">to_replace</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_flow_classification_summary</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parse_table</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_parse_header</span><span class="p">(</span><span class="n">header</span><span class="p">),</span> <span class="n">data</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_flow_classification_summary</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">conduit_surcharge_summary</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DataFrame</span><span class="p">:</span>
+        <span class="sd">"""</span>
+<span class="sd">        Conduit surcharge summary that details the hours of surcharging and</span>
+<span class="sd">        capacity limited conditions.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        pd.DataFrame</span>
+<span class="sd">            DataFrame of conduit surcharge summary table</span>
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">"_conduit_surcharge_summary"</span><span class="p">):</span>
+            <span class="n">header</span><span class="p">,</span> <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_split_section</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_sections</span><span class="p">[</span><span class="s2">"Conduit Surcharge Summary"</span><span class="p">]</span>
+            <span class="p">)</span>
+            <span class="n">to_remove</span> <span class="o">=</span> <span class="s2">"--------- Hours Full --------"</span>
+            <span class="n">to_replace</span> <span class="o">=</span> <span class="s2">"HrsFull   HoursFull  HrsFull "</span>
+            <span class="n">header</span> <span class="o">=</span> <span class="n">header</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">to_remove</span><span class="p">,</span> <span class="n">to_replace</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_conduit_surcharge_summary</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parse_table</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_parse_header</span><span class="p">(</span><span class="n">header</span><span class="p">),</span> <span class="n">data</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_conduit_surcharge_summary</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">pumping_summary</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DataFrame</span><span class="p">:</span>
+        <span class="sd">"""</span>
+<span class="sd">        Pumping summary that details the utilization, peak flow rates, total flow volume,</span>
+<span class="sd">        power usage, and time off pump curve for each pump.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        pd.DataFrame</span>
+<span class="sd">            DataFrame of pumping summary table</span>
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">"_pumping_summary"</span><span class="p">):</span>
+            <span class="n">header</span><span class="p">,</span> <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_split_section</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_sections</span><span class="p">[</span><span class="s2">"Pumping Summary"</span><span class="p">])</span>
+            <span class="n">header</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parse_header</span><span class="p">(</span><span class="n">header</span><span class="p">)</span>
+            <span class="n">header</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="s2">"Percent_Time_Off_Pump_Curve_Low"</span>
+            <span class="n">header</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">"Percent_Time_Off_Pump_Curve_High"</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_pumping_summary</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parse_table</span><span class="p">(</span><span class="n">header</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pumping_summary</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">link_pollutant_load_summary</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DataFrame</span><span class="p">:</span>
+        <span class="sd">"""</span>
+<span class="sd">        Link pollutant load summary that details the total pollutant mass discharged</span>
+<span class="sd">        from each link.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        pd.DataFrame</span>
+<span class="sd">            DataFrame of link pollutant load summary table</span>
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">"_link_pollutant_load_summary"</span><span class="p">):</span>
+            <span class="n">header</span><span class="p">,</span> <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_split_section</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_sections</span><span class="p">[</span><span class="s2">"Link Pollutant Load Summary"</span><span class="p">]</span>
+            <span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">_link_pollutant_load_summary</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parse_table</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_parse_header</span><span class="p">(</span><span class="n">header</span><span class="p">),</span> <span class="n">data</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_link_pollutant_load_summary</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">analysis_begun</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Timestamp</span><span class="p">:</span>
+        <span class="sd">"""</span>
+<span class="sd">        Date and time when the simulation was started</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        Timestamp</span>
+<span class="sd">            Simulation start time</span>
+
+<span class="sd">        Raises</span>
+<span class="sd">        ------</span>
+<span class="sd">        Exception</span>
+<span class="sd">            if analysis begun text could not be found in the report file</span>
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">"_analysis_begun"</span><span class="p">):</span>
+            <span class="n">pattern</span> <span class="o">=</span> <span class="sa">R</span><span class="s2">"\s+Analysis begun on:\s+([^\n]+)$"</span>
+            <span class="n">s</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">pattern</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rpt_text</span><span class="p">,</span> <span class="n">flags</span><span class="o">=</span><span class="n">re</span><span class="o">.</span><span class="n">MULTILINE</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">s</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_analysis_begun</span> <span class="o">=</span> <span class="n">to_datetime</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">"Error finding analysis begun"</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_analysis_begun</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">analysis_end</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Timestamp</span><span class="p">:</span>
+        <span class="sd">"""</span>
+<span class="sd">        Date and time when the simulation ended</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        Timestamp</span>
+<span class="sd">            Simulation end time</span>
+
+<span class="sd">        Raises</span>
+<span class="sd">        ------</span>
+<span class="sd">        Exception</span>
+<span class="sd">            if analysis ended text could not be found in the report file</span>
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">"_analysis_end"</span><span class="p">):</span>
+            <span class="n">pattern</span> <span class="o">=</span> <span class="sa">R</span><span class="s2">"\s+Analysis ended on:\s+([^\n]+)$"</span>
+            <span class="n">s</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">pattern</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rpt_text</span><span class="p">,</span> <span class="n">flags</span><span class="o">=</span><span class="n">re</span><span class="o">.</span><span class="n">MULTILINE</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">s</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_analysis_end</span> <span class="o">=</span> <span class="n">to_datetime</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">"Error finding analysis end"</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_analysis_end</span></div>
+</pre></div>
+
+          </article>
+        </div>
+      </div>
+    </main>
+  </div>
+  <footer class="md-footer">
+    <div class="md-footer-nav">
+      <nav class="md-footer-nav__inner md-grid">
+          
+          
+        </a>
+        
+      </nav>
+    </div>
+    <div class="md-footer-meta md-typeset">
+      <div class="md-footer-meta__inner md-grid">
+        <div class="md-footer-copyright">
+          <div class="md-footer-copyright__highlight">
+              &#169; Copyright 2021, Constantine Karos.
+              
+          </div>
+            Last updated on
+              Mar 31, 2022.
+            <br/>
+            Created using
+            <a href="http://www.sphinx-doc.org/">Sphinx</a> 4.4.0.
+             and
+            <a href="https://github.com/bashtage/sphinx-material/">Material for
+              Sphinx</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+  <script src="../../../../_static/javascripts/application.js"></script>
+  <script>app.initialize({version: "1.0.4", url: {base: ".."}})</script>
+  </body>
+</html>

@@ -14,7 +14,7 @@ class Report(object):
     """text string of rpt file contents"""
 
     _sections: Dict[str, str]
-    """dictionary of SWMM report sections as {section name : section text}"""
+    """dictionary of SWMM report sections as {section name: section text}"""
 
     def __init__(self, rptfile: str):
         """Base class for a SWMM simulation report file.
@@ -25,7 +25,7 @@ class Report(object):
 
         Parameters
         ----------
-        rptfile : str
+        rptfile: str
             model report file path
         """
 
@@ -52,7 +52,7 @@ class Report(object):
 
         Parameters
         ----------
-        rpt_text : str
+        rpt_text: str
             Text content of the report file
         Returns
         -------
@@ -81,7 +81,7 @@ class Report(object):
 
         Parameters
         ----------
-        section : str
+        section: str
             The section text produced by _find_sections
 
         Returns
@@ -112,7 +112,7 @@ class Report(object):
 
         Parameters
         ----------
-        section : str
+        section: str
             The section text produced by _find_sections
 
         Returns
@@ -157,7 +157,7 @@ class Report(object):
 
         Parameters
         ----------
-        header : str
+        header: str
             Header text string produced from _split_section
 
         Returns
@@ -193,14 +193,14 @@ class Report(object):
 
         Parameters
         ----------
-        header : Sequence[str]
+        header: Sequence[str]
             Sequence of column names to assign to DataFrame. Mostly can be produced from _parse_header.
-        data : str
+        data: str
             Data string produced form _split_section
-        sep : str, optional
+        sep: str, optional
             Delimeter to be fed into pandas read_csv function that operates on data string
             , by default R"\s{2,}|\s:\s"
-        index_col : int, optional
+        index_col: int, optional
             Column in data to be used as DataFrame index, by default 0
 
         Returns

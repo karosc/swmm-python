@@ -30,7 +30,7 @@ def output_open_handler(func):
 
     Parameters
     ----------
-    func : function
+    func: function
         method of Output class
     """
 
@@ -69,7 +69,7 @@ class Output(object):
 
         Parameters
         ----------
-        binfile : str
+        binfile: str
             model binary file path
 
         Returns
@@ -200,12 +200,12 @@ class Output(object):
 
         Parameters
         ----------
-        elementID : str, int
+        elementID: str, int
             The name or index of the model element listed in the index_dict dict.
-        indexSquence : one of more string
+        indexSquence: one of more string
             The ordered sequence against which to validate the index
             (one of self.nodes, self.links, self.subcatchments).
-        elementType : str
+        elementType: str
             The type of model element (e.g. node, link, etc.)
             Only used to print the exception if an attribute cannot be found.
 
@@ -246,9 +246,9 @@ class Output(object):
 
         Parameters
         ----------
-        attribute : Union[int, str, Sequence[Union[int, str]], None]
+        attribute: Union[int, str, Sequence[Union[int, str]], None]
             The attribute to validate against validAttributes.
-        validAttributes : dict
+        validAttributes: dict
             THe dict of attributes against which to validate attribute.
 
         Returns
@@ -310,10 +310,10 @@ class Output(object):
 
         Parameters
         ----------
-        element : Union[int, str, Sequence[Union[int, str]], None]
+        element: Union[int, str, Sequence[Union[int, str]], None]
             The element name or index or None. If None, return all elements in
             validElements.
-        validElements : Sequence[str]
+        validElements: Sequence[str]
             Tuple of elements against which to validate element.
 
         Returns
@@ -363,7 +363,7 @@ class Output(object):
 
         Parameters
         ----------
-        name : str
+        name: str
             The name of pollutant.
 
         Returns
@@ -631,9 +631,9 @@ class Output(object):
 
         Parameters
         ----------
-        object_type : int
+        object_type: int
             The object type from swmm.toolkit.shared_enum.ElementType.
-        index : int
+        index: int
             The object index.
 
         Returns
@@ -665,11 +665,11 @@ class Output(object):
 
         Parameters
         ----------
-        dateTime : datetime-like or string or sequence of such
+        dateTime: datetime-like or string or sequence of such
             datetime to convert. Must be a datetime-like object or convertable
             with `pd.to_datetime`.
 
-        ifNone : int
+        ifNone: int
             The value to return if dateTime is None, defaults to 0.
 
         method: str
@@ -733,7 +733,7 @@ class Output(object):
 
         Parameters
         ----------
-        subcatchment : Union[str, int, Sequence[Union[str, int]]]
+        subcatchment: Union[str, int, Sequence[Union[str, int]]]
             The name(s) of subcatchment(s).
 
         Returns
@@ -788,7 +788,7 @@ class Output(object):
 
         Parameters
         ----------
-        node : Union[str, int, Sequence[Union[str, int]]]
+        node: Union[str, int, Sequence[Union[str, int]]]
             The name(s) of node(s)
 
         Returns
@@ -842,7 +842,7 @@ class Output(object):
 
         Parameters
         ----------
-        link : Union[str, int, Sequence[Union[str, int]]]
+        link: Union[str, int, Sequence[Union[str, int]]]
             The name(s) of link(s)
 
         Returns
@@ -906,24 +906,24 @@ class Output(object):
 
         Parameters
         ----------
-        elementIndexArray : List[int]
+        elementIndexArray: List[int]
             Array of SWMM model element indicies
-        attributeIndexArray : List[enum]
+        attributeIndexArray: List[enum]
             Array of attribute Enums to pull for each element
-        startIndex : int
+        startIndex: int
             SWMM simulation time index to start timeseries
-        endIndex : int
+        endIndex: int
             SWMM simulation time index to end timeseries
-        columns : Optional[str]
+        columns: Optional[str]
              Decide whether or not to break out elements or attributes as columns. May be one of:
 
-             None   : Return long-form data with one column for each data point
+             None: Return long-form data with one column for each data point
 
-            'elem' : Return data with a column for each element. If more than one attribute are given, attribute names are added to the index.
+            'elem': Return data with a column for each element. If more than one attribute are given, attribute names are added to the index.
 
-            'attr' : Return data with a column for each attribute. If more than one element are given, element names are added to the index.
+            'attr': Return data with a column for each attribute. If more than one element are given, element names are added to the index.
 
-        getterFunc : Callable
+        getterFunc: Callable
             The swmm.toolkit series getter function. Should be one of:
 
              swmm.toolkit.output.get_subcatch_series
@@ -1012,22 +1012,22 @@ class Output(object):
 
         Parameters
         ----------
-        elementArray : List[str]
+        elementArray: List[str]
             Array of SWMM model element names
-        attributeArray : List[str]
+        attributeArray: List[str]
             Array of attribute names pulled for each element
-        startIndex : int
+        startIndex: int
             SWMM simulation time index to start timeseries
-        endIndex : int
+        endIndex: int
             SWMM simulation time index to end timeseries
-        columns : Optional[str]
+        columns: Optional[str]
              Decide whether or not to break out elements or attributes as columns. May be one of:
 
-             None   : Return long-form data with one column for each data point
+             None: Return long-form data with one column for each data point
 
-            'elem' : Return data with a column for each element. If more than one attribute are given, attribute names are added to the index.
+            'elem': Return data with a column for each element. If more than one attribute are given, attribute names are added to the index.
 
-            'attr' : Return data with a column for each attribute. If more than one element are given, element names are added to the index.
+            'attr': Return data with a column for each attribute. If more than one element are given, element names are added to the index.
 
         Returns
         -------
@@ -1118,10 +1118,10 @@ class Output(object):
 
         Parameters
         ----------
-        subcatchment : Union[int, str, Sequence[Union[int, str]], None]
+        subcatchment: Union[int, str, Sequence[Union[int, str]], None]
             The subcatchment index or name.
 
-        attribute : Union[int, str, Enum, Sequence[Union[int, str, Enum]], None],
+        attribute: Union[int, str, Enum, Sequence[Union[int, str, Enum]], None],
             The attribute index or name.
 
             On of:
@@ -1138,12 +1138,12 @@ class Output(object):
 
             Setting to None indicates all attributes.
 
-        start : Union[str,int, datetime, None], optional
+        start: Union[str,int, datetime, None], optional
             The start datetime or index of from which to return series, defaults to None.
 
             Setting to None indicates simulation start.
 
-        end : Union[str,int, datetime, None], optional
+        end: Union[str,int, datetime, None], optional
             The end datetime or index of from which to return series, defaults to None.
 
             Setting to None indicates simulation end.
@@ -1151,11 +1151,11 @@ class Output(object):
         columns: Optional[str], optional
             Decide whether or not to break out elements or attributes as columns. May be one of:
 
-            None   : Return long-form data with one column for each data point
+            None: Return long-form data with one column for each data point
 
-            'elem' : Return data with a column for each element. If more than one attribute are given, attribute names are added to the index.
+            'elem': Return data with a column for each element. If more than one attribute are given, attribute names are added to the index.
 
-            'attr' : Return data with a column for each attribute. If more than one element are given, element names are added to the index.
+            'attr': Return data with a column for each attribute. If more than one element are given, element names are added to the index.
 
             defaults to 'attr'.
 
@@ -1310,10 +1310,10 @@ class Output(object):
 
         Parameters
         ----------
-        node : Union[int, str, Sequence[Union[int, str]], None]
+        node: Union[int, str, Sequence[Union[int, str]], None]
             The node index or name.
 
-        attribute : Union[int, str, Enum, Sequence[Union[int, str, Enum]], None],
+        attribute: Union[int, str, Enum, Sequence[Union[int, str, Enum]], None],
             The attribute index or name.
 
             On of:
@@ -1328,12 +1328,12 @@ class Output(object):
 
             Setting to None indicates all attributes.
 
-        start : Union[str, int, datetime, None], optional
+        start: Union[str, int, datetime, None], optional
             The start datetime or index of from which to return series, defaults to None.
 
             Setting to None indicates simulation start.
 
-        end : Union[str, int, datetime, None], optional
+        end: Union[str, int, datetime, None], optional
             The end datetime or index of from which to return series, defaults to None.
 
             Setting to None indicates simulation end.
@@ -1341,11 +1341,11 @@ class Output(object):
         columns: Optional[str], optional
             Decide whether or not to break out elements or attributes as columns. May be one of:
 
-            None   : Return long-form data with one column for each data point
+            None: Return long-form data with one column for each data point
 
-            'elem' : Return data with a column for each element. If more than one attribute are given, attribute names are added to the index.
+            'elem': Return data with a column for each element. If more than one attribute are given, attribute names are added to the index.
 
-            'attr' : Return data with a column for each attribute. If more than one element are given, element names are added to the index.
+            'attr': Return data with a column for each attribute. If more than one element are given, element names are added to the index.
 
             defaults to 'attr'.
 
@@ -1499,10 +1499,10 @@ class Output(object):
 
         Parameters
         ----------
-        link : Union[int, str, Sequence[Union[int, str]], None]
+        link: Union[int, str, Sequence[Union[int, str]], None]
             The link index or name.
 
-        attribute : Union[int, str, Enum, Sequence[Union[int, str, Enum]], None]
+        attribute: Union[int, str, Enum, Sequence[Union[int, str, Enum]], None]
             The attribute index or name.
 
             On of:
@@ -1516,12 +1516,12 @@ class Output(object):
 
             Setting to None indicates all attributes.
 
-        start_index : Union[str,int, datetime, None], optional
+        start_index: Union[str,int, datetime, None], optional
             The start datetime or index of from which to return series, defaults to None.
 
             Setting to None indicates simulation start.
 
-        end_index : Union[str,int, datetime, None], optional
+        end_index: Union[str,int, datetime, None], optional
             The end datetime or index of from which to return series, defaults to None.
 
             Setting to None indicates simulation end.
@@ -1529,11 +1529,11 @@ class Output(object):
         columns: Optional[str], optional
             Decide whether or not to break out elements or attributes as columns. May be one of:
 
-            None   : Return long-form data with one column for each data point
+            None: Return long-form data with one column for each data point
 
-            'elem' : Return data with a column for each element. If more than one attribute are given, attribute names are added to the index.
+            'elem': Return data with a column for each element. If more than one attribute are given, attribute names are added to the index.
 
-            'attr' : Return data with a column for each attribute. If more than one element are given, element names are added to the index.
+            'attr': Return data with a column for each attribute. If more than one element are given, element names are added to the index.
 
             defaults to 'attr'.
 
@@ -1684,7 +1684,7 @@ class Output(object):
 
         Parameters
         ----------
-        attribute : Union[int, str, Enum, Sequence[Union[int, str, Enum]], None]
+        attribute: Union[int, str, Enum, Sequence[Union[int, str, Enum]], None]
             The attribute index or name.
 
             On of:
@@ -1700,12 +1700,12 @@ class Output(object):
 
             Setting to None indicates all attributes.
 
-        start_index : Union[str, int, datetime, None], optional
+        start_index: Union[str, int, datetime, None], optional
             The start datetime or index of from which to return series, defaults to None.
 
             Setting to None indicates simulation start.
 
-        end_index : Union[str, int, datetime, None], optional
+        end_index: Union[str, int, datetime, None], optional
             The end datetime or index of from which to return series, defaults to None.
 
             Setting to None indicates simulation end.
@@ -1781,10 +1781,10 @@ class Output(object):
 
         Parameters
         ----------
-        time : Union[str, int, datetime]
+        time: Union[str, int, datetime]
             The datetime or simulation index for which to pull data, defaults to None.
 
-        attribute : Union[int, str, Enum, Sequence[Union[int, str, Enum]], None],
+        attribute: Union[int, str, Enum, Sequence[Union[int, str, Enum]], None],
             The attribute index or name.
 
             On of:
@@ -1857,10 +1857,10 @@ class Output(object):
 
         Parameters
         ----------
-        time : Union[str, int, datetime]
+        time: Union[str, int, datetime]
             The datetime or simulation index for which to pull data, defaults to None
 
-        attribute : Union[int, str, Enum, Sequence[Union[int, str, Enum]], None],
+        attribute: Union[int, str, Enum, Sequence[Union[int, str, Enum]], None],
             The attribute index or name.
 
             On of:
@@ -1939,10 +1939,10 @@ class Output(object):
 
         Parameters
         ----------
-        time : Union[str, int, datetime]
+        time: Union[str, int, datetime]
             The datetime or simulation index for which to pull data, defaults to None.
 
-        attribute : Union[int, str, Sequence[Union[int, str]], None]
+        attribute: Union[int, str, Sequence[Union[int, str]], None]
             The attribute index or name.
 
             On of:
@@ -2015,10 +2015,10 @@ class Output(object):
 
         Parameters
         ----------
-        time : Union[str, int, datetime]
+        time: Union[str, int, datetime]
             The datetime or simulation index for which to pull data, defaults to None.
 
-        attribute : Union[int, str, Sequence[Union[int, str]], None]
+        attribute: Union[int, str, Sequence[Union[int, str]], None]
             The attribute index or name.
 
             On of:
@@ -2104,7 +2104,7 @@ class Output(object):
 
         Parameters
         ----------
-        subcatchment : Union[int, str, Sequence[Union[int, str]], None],
+        subcatchment: Union[int, str, Sequence[Union[int, str]], None],
             The subcatchment(s) name(s) or index(s).
 
         time: Union[int, str, Sequence[Union[int, str]], None],
@@ -2202,7 +2202,7 @@ class Output(object):
 
         Parameters
         ----------
-        node : Union[int, str, Sequence[Union[int, str]], None],
+        node: Union[int, str, Sequence[Union[int, str]], None],
             The node(s) name(s) or index(s).
 
         time: Union[int, str, Sequence[Union[int, str]], None],
@@ -2303,7 +2303,7 @@ class Output(object):
 
         Parameters
         ----------
-        link : Union[int, str, Sequence[Union[int, str]], None],
+        link: Union[int, str, Sequence[Union[int, str]], None],
             The link(s) name(s) or index(s).
 
         time: Union[int, str, Sequence[Union[int, str]], None],
@@ -2400,7 +2400,7 @@ class Output(object):
 
         Parameters
         ----------
-        time : Union[str, int, datetime]
+        time: Union[str, int, datetime]
             The datetime or simulation index.
 
         asframe: bool
@@ -2455,9 +2455,9 @@ class Output(object):
 
         Parameters
         ----------
-        link : Union[str, Sequence[str]]
+        link: Union[str, Sequence[str]]
             The list of links that belong to the structure.
-        node : Union[str, Sequence[str]]
+        node: Union[str, Sequence[str]]
             The list of nodes that below to the structure.
 
         Returns
@@ -2476,7 +2476,7 @@ class Output(object):
     # swig/python detected a memory leak of type 'struct Handle *', no destructor found.
     def __del__(self) -> NoReturn:
         """
-        Destructor for outfile handle
+         Destructor for outfile handle
 
         :return: Nothing
         :rtype: NoReturn

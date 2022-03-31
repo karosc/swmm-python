@@ -30,7 +30,7 @@ Get time series data for one or more elements and one or more variables.
    :nosignatures:
    :toctree: api/
 
-   swmm.pandas.Output.link_series
+   Output.link_series
    Output.node_series   
    Output.subcatch_series
    Output.system_series

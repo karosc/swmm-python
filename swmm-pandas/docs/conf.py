@@ -95,7 +95,7 @@ exclude_patterns = [
     ".DS_Store",
 ]
 # The name of the Pygments (syntax highlighting) style to use.
-pygments_style = "friendly"
+pygments_style = "default"
 
 # If true, `todo` and `todoList` produce output, else they produce nothing.
 todo_include_todos = False
@@ -105,9 +105,9 @@ todo_include_todos = False
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
-extensions.append("sphinx_material")
+extensions.append("sphinx_immaterial")
 html_title = "swmm-pandas"
-html_theme = "sphinx_material"
+html_theme = "sphinx_immaterial"
 
 # Theme options are theme-specific and customize the look and feel of a
 # theme further.  For a list of options available for each theme, see the
@@ -118,25 +118,68 @@ html_sidebars = {
 
 
 html_theme_options = {
-    "base_url": "swmm.karosc.com",
-    "repo_url": "https://github.com/karosc/swmm-python/tree/swmm-pandas/swmm-pandas",
-    "repo_name": "swmm-pandas",
-    # "html_minify": True,
-    # "css_minify": True,
-    "theme_color": "red",
-    "color_primary": "indigo",
-    "color_accent": "blue",
-    "nav_title": "swmm-pandas",
-    "globaltoc_depth": 3,
-    "globaltoc_includehidden": True,
-    "globaltoc_collapse": True,
-    "nav_title": "swmm-pandas {0}".format(version),
-    "master_doc": False,
-    "nav_links": [],
-    "heroes": {
-        "index": "",
+    "icon": {
+        "repo": "fontawesome/brands/github",
     },
-}
+    "site_url": "",
+    "repo_url": "https://github.com/karosc/swmm-python/",
+    "repo_name": "swmm-pandas",
+    "repo_type": "github",
+    "icon": {
+        "repo": "fontawesome/brands/github-alt",
+    },
+    "edit_uri": "blob/main/docs",
+    # "google_analytics": ["UA-XXXXX", "auto"],
+    "globaltoc_collapse": True,
+    "features": [
+        "navigation.expand",
+        # "navigation.tabs",
+        # "toc.integrate",
+        "navigation.sections",
+        # "navigation.instant",
+        # "header.autohide",
+        "navigation.top",
+        # "navigation.tracking",
+        # "search.highlight",
+        "search.share",
+    ],
+    "palette": [
+        {
+            "media": "(prefers-color-scheme: light)",
+            "scheme": "default",
+            "primary": "indigo",
+            "accent": "green",
+            "toggle": {
+                "icon": "material/lightbulb-outline",
+                "name": "Switch to dark mode",
+            },
+        },
+        {
+            "media": "(prefers-color-scheme: dark)",
+            "scheme": "slate",
+            "primary": "light-green",
+            "accent": "deep-orange",
+            "toggle": {
+                "icon": "material/lightbulb",
+                "name": "Switch to light mode",
+            },
+        },
+    ],
+    "version_dropdown": False,
+    # "version_info": [
+    #     {
+    #         "version": "https://sphinx-immaterial.rtfd.io",
+    #         "title": "ReadTheDocs",
+    #         "aliases": [],
+    #     },
+    #     {
+    #         "version": "https://jbms.github.io/sphinx-immaterial",
+    #         "title": "Github Pages",
+    #         "aliases": [],
+    #     },
+    # ],
+    "toc_title_is_page_title": False,
+}  # end html_theme_options
 
 html_logo = "_static/favicon.png"
 html_favicon = "_static/favicon.png"
@@ -160,7 +203,7 @@ html_domain_indices = False
 html_static_path = ["_static"]
 
 html_css_files = [
-    # "css/custom.css",
+    "./css/custom.css",
 ]
 
 # If false, no module index is generated.

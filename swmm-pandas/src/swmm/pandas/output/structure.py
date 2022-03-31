@@ -34,11 +34,11 @@ class Structure(object):
 
     Parameters
     ----------
-    outfile : swmm.pandas.Output
+    outfile: swmm.pandas.Output
         The swmm-pandas outfile object containing the model elements.
-    link : Union[str, Sequence[str]]
+    link: Union[str, Sequence[str]]
         The list of links that belong to the structure.
-    node : Union[str, Sequence[str]]
+    node: Union[str, Sequence[str]]
         The list of nodes that below to the structure.
     """
 
@@ -110,18 +110,18 @@ class Structure(object):
 
         Parameters
         ----------
-        df : pd.DataFrame
+        df: pd.DataFrame
             A DataFrame with a time series each column for each element in the structure.
             (e.g. output of self.flowFrame)
-        useNegative : Union[bool, Sequence[bool]], optional
+        useNegative: Union[bool, Sequence[bool]], optional
             If true, negative values will not be removed from the time series.
             Can either provide a boolean to apply to all columns or a list of
             booleans to apply to each column, by default False
-        reverse : Union[bool, Sequence[bool]], optional
+        reverse: Union[bool, Sequence[bool]], optional
             If true, the timeseries will be multiplied by -1.
             Can either priovide a boolean to apply to all columns or a list of
             booleans to apply to each column, by default False
-        aggFunc : str, optional
+        aggFunc: str, optional
             The aggregation function to apply to all columns in the DataFrame. Should be
             compatible with `pd.DataFrame.agg`_., by default "sum"
 
@@ -181,15 +181,15 @@ class Structure(object):
 
         Parameters
         ----------
-        inter_event_period : float, optional
+        inter_event_period: float, optional
             The period in hours of flow less than or equal to thresholdFlow that demarks
             flow events, default to 6
-        thresholdFlow : float, optional
+        thresholdFlow: float, optional
             The flowrate in model flow units that dry or baseline condition that is not considered
             significant, default to 0.01
-        useNegativeFlow : bool, optional
+        useNegativeFlow: bool, optional
             If true, the method will consider negative flows when calculating flow volumes, defaults  False
-        reverseFlow : bool, optional
+        reverseFlow: bool, optional
             If true, the method will calculate the flow in the reverse direction by multiplying
             the timeseries by negative one, defaults to False
 
@@ -260,10 +260,10 @@ class Structure(object):
 
         Parameters
         ----------
-        inter_event_period : float, optionalep
+        inter_event_period: float, optionalep
             The period in hours of flooding less than or equal to thresholdFlood that demarks
             flow events, default to 6
-        thresholdFood : float, optional
+        thresholdFood: float, optional
             The flooding rate in model flow units above which should be considered in
             calculations, default to 0.01
 

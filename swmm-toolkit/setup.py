@@ -65,7 +65,7 @@ else:
 
 # Set Platform specific cmake args here
 if platform_system == "Windows":
-    cmake_args = ["-GVisual Studio 15 2017 Win64"]
+    cmake_args = ["-GVisual Studio 16 2019"]
 
 elif platform_system == "Darwin":
     cmake_args = ["-GNinja","-DCMAKE_OSX_DEPLOYMENT_TARGET:STRING=10.9"]

@@ -291,7 +291,7 @@ def test_system_result(outfile):
         ]
     )
 
-    assert np.allclose(df.Result.to_numpy(), refarray, atol=0.000001)
+    assert np.allclose(df.result.to_numpy(), refarray, atol=0.000001)
 
 
 @pytest.mark.parametrize(

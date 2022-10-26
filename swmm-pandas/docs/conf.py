@@ -58,7 +58,6 @@ templates_path = ["_templates"]
 # You can specify multiple suffix as a list of string:
 #
 source_suffix = [".rst", ".md"]
-# source_suffix = ".rst"
 
 # The master toctree document.
 master_doc = "index"
@@ -96,7 +95,7 @@ exclude_patterns = [
 ]
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = "default"
-
+pygments_dark_style = "dracula"
 # If true, `todo` and `todoList` produce output, else they produce nothing.
 todo_include_todos = False
 
@@ -105,80 +104,30 @@ todo_include_todos = False
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
-extensions.append("sphinx_immaterial")
 html_title = "swmm-pandas"
-html_theme = "sphinx_immaterial"
+html_theme = "furo"
 
 # Theme options are theme-specific and customize the look and feel of a
 # theme further.  For a list of options available for each theme, see the
 # documentation.
-html_sidebars = {
-    "**": ["logo-text.html", "globaltoc.html", "localtoc.html", "searchbox.html"]
-}
-
-
 html_theme_options = {
-    "icon": {
-        "repo": "fontawesome/brands/github",
+    "dark_css_variables": {
+        "color-background-primary": "#282A36",
+        "color-sidebar-background": "#22212c",
+        "color-api-name": "#BD93F9",
+        "color-sidebar-link-text--top-level": "#FF79C6",
+        # "color-link": "#8BE9FD",
+        "color-highlight-on-target": "#BD93F91C",
+        "color-toc-item-text--active": "#50FA7B",
     },
-    "site_url": "",
-    "repo_url": "https://github.com/karosc/swmm-python/",
-    "repo_name": "swmm-pandas",
-    "repo_type": "github",
-    "icon": {
-        "repo": "fontawesome/brands/github-alt",
-    },
-    "edit_uri": "blob/main/docs",
-    # "google_analytics": ["UA-XXXXX", "auto"],
-    "globaltoc_collapse": True,
-    "features": [
-        "navigation.expand",
-        # "navigation.tabs",
-        # "toc.integrate",
-        "navigation.sections",
-        # "navigation.instant",
-        # "header.autohide",
-        "navigation.top",
-        # "navigation.tracking",
-        # "search.highlight",
-        "search.share",
-    ],
-    "palette": [
+    "footer_icons": [
         {
-            "media": "(prefers-color-scheme: light)",
-            "scheme": "default",
-            "primary": "indigo",
-            "accent": "green",
-            "toggle": {
-                "icon": "material/lightbulb-outline",
-                "name": "Switch to dark mode",
-            },
-        },
-        {
-            "media": "(prefers-color-scheme: dark)",
-            "scheme": "slate",
-            "primary": "light-green",
-            "accent": "deep-orange",
-            "toggle": {
-                "icon": "material/lightbulb",
-                "name": "Switch to light mode",
-            },
+            "name": "GitHub",
+            "url": "https://github.com/karosc/swmm-python/tree/swmm-pandas/swmm-pandas",
+            "html": "",
+            "class": "fa-brands fa-github-alt fa-2x",
         },
     ],
-    "version_dropdown": False,
-    # "version_info": [
-    #     {
-    #         "version": "https://sphinx-immaterial.rtfd.io",
-    #         "title": "ReadTheDocs",
-    #         "aliases": [],
-    #     },
-    #     {
-    #         "version": "https://jbms.github.io/sphinx-immaterial",
-    #         "title": "Github Pages",
-    #         "aliases": [],
-    #     },
-    # ],
-    "toc_title_is_page_title": False,
 }  # end html_theme_options
 
 html_logo = "_static/favicon.png"
@@ -188,6 +137,7 @@ numpydoc_show_class_members = False
 autodoc_member_order = "bysource"
 autodoc_typehints = "none"
 autoclass_content = "both"
+add_module_names = False
 
 plot_include_source = True
 plot_html_show_source_link = False
@@ -204,6 +154,9 @@ html_static_path = ["_static"]
 
 html_css_files = [
     "./css/custom.css",
+    "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/fontawesome.min.css",
+    "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/solid.min.css",
+    "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/brands.min.css",
 ]
 
 # If false, no module index is generated.

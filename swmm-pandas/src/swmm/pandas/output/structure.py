@@ -22,7 +22,7 @@ hour_unit = np.timedelta64(1, "h")
 # and make more DRY when those are added
 
 
-class Structure(object):
+class Structure:
     """
     A class that represents a particular system strucuture that may be represented by
     multiple model elements. The outputs from each element are combined into a single
@@ -224,6 +224,8 @@ class Structure(object):
         # find indices of max flow timesteps in each event
         maxSer = gpd.flow_rate.idxmax()
 
+        # find event start date
+        start_date = gpd.datetime.min().rename("start_datetime")
         # calculate volume for each event
         vol = (
             gpd.flow_rate.sum()
@@ -241,6 +243,7 @@ class Structure(object):
         # join in event volumes and durations with event maxima
         return (
             q.loc[maxSer]
+            .join(start_date, on="event_num")
             .join(vol, on="event_num")
             .join(durations, on="event_num")
             .rename({"flow_rate": "maxFlow", "datetime": "time_of_maxFlow"}, axis=1)

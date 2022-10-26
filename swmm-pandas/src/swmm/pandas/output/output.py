@@ -1,9 +1,13 @@
+import enum
 from aenum import EnumMeta
 import os.path
 import warnings
 from datetime import datetime, timedelta
 from functools import wraps
 from typing import Callable, List, NoReturn, Optional, Sequence, Tuple, Union
+from itertools import product
+from io import SEEK_END, SEEK_SET
+import struct
 
 import numpy as np
 from aenum import Enum, extend_enum
@@ -18,6 +22,7 @@ from pandas.core.api import (
     MultiIndex,
     Timestamp,
     to_datetime,
+    IndexSlice,
 )
 from swmm.toolkit import output, shared_enum
 
@@ -44,8 +49,8 @@ def output_open_handler(func):
     return inner_function
 
 
-class Output(object):
-    def __init__(self, binfile: str):
+class Output:
+    def __init__(self, binfile: str, preload: bool = False):
         """Base class for a SWMM binary output file.
 
         The output object provides several options to process timeseries within binary output file.
@@ -111,6 +116,8 @@ class Output(object):
 
         self._delete_handle: bool = False
         """Indicates if output file was closed correctly"""
+
+        self._preload: bool = preload
 
         self._loaded: bool = False
         """Indicates if output file was loaded correctly"""
@@ -439,6 +446,46 @@ class Output(object):
                     extend_enum(self.node_attributes, nom.upper(), 6 + i)
                     extend_enum(self.link_attributes, nom.upper(), 5 + i)
 
+        if self._preload:
+
+            # respos = output.get_positions(self._handle)[2]
+            # self._close()
+
+            subs = list(
+                product(
+                    ["sub"],
+                    range(len(self.subcatchments)),
+                    range(len(self.subcatch_attributes)),
+                )
+            )
+            nodes = list(
+                product(
+                    ["node"],
+                    range(len(self.nodes)),
+                    range(len(self.node_attributes)),
+                )
+            )
+            links = list(
+                product(
+                    ["link"],
+                    range(len(self.links)),
+                    range(len(self.link_attributes)),
+                )
+            )
+            system = list(product(["sys"], ["sys"], range(len(self.system_attributes))))
+
+            cols = subs + nodes + links + system
+            cols.insert(0, ("datetime", 0, 0))
+
+            idx = MultiIndex.from_tuples(cols)
+            fmts = "f8" + ",f4" * (len(cols) - 1)
+
+            with open(self._binfile, "rb") as fil:
+                fil.seek(self._output_position, 0)
+                dat = np.core.rec.fromfile(fil, formats=fmts)
+            self.data = DataFrame(dat)
+            self.data.columns = idx
+
         return True
 
     def _close(self) -> bool:
@@ -454,13 +501,23 @@ class Output(object):
 
         """
         if self._loaded:
-            self._loaded = False
-            self._delete_handle = True
             output.close(self._handle)
+            self._loaded = False
+            del self._handle
+            self._handle = None
+            self._delete_handle = True
 
         return True
 
     ###### outfile property getters ######
+    @property
+    def _output_position(self):
+        if not hasattr(self, "__output_position"):
+            with open(self._binfile, "rb") as fil:
+                fil.seek(-4 * 4, SEEK_END)
+                self.__output_position = struct.unpack("i", fil.read(4))[0]
+
+        return self.__output_position
 
     @property  # type: ignore
     @output_open_handler
@@ -693,7 +750,7 @@ class Output(object):
             return dt.astype(int).tolist()
 
         # ensure datetime value
-        dt = to_datetime(dateTime)
+        dt = to_datetime(dt)
         return self.timeIndex.get_indexer(dt, method=method).tolist()
 
     @property
@@ -889,6 +946,29 @@ class Output(object):
         )
 
     ####### series getters #######
+
+    def _memory_series_getter(self, type: str) -> Callable:
+        if type == "sys":
+
+            def getter(_handle, Attr: Enum, startIndex: int, endIndex: int) -> ndarray:
+                # col = f"{type};{type};{Attr.value}"
+                # return self.data[col][startIndex:endIndex]
+                return self.data.loc[
+                    startIndex : endIndex - 1, IndexSlice[type, type, Attr.value]
+                ].to_numpy()
+
+        else:
+
+            def getter(
+                _handle, elemIdx: int, Attr: Enum, startIndex: int, endIndex: int
+            ) -> ndarray:
+                # col = f"{type};{elemIdx};{Attr.value}"
+                # return self.data[col][startIndex:endIndex]
+                return self.data.loc[
+                    startIndex : endIndex - 1, IndexSlice[type, elemIdx, Attr.value]
+                ].to_numpy()
+
+        return getter
 
     def _model_series(
         self,
@@ -1274,13 +1354,19 @@ class Output(object):
         startIndex = self._time2step(start, 0)[0]
         endIndex = self._time2step(end, self._period)[0]
 
+        getter = (
+            self._memory_series_getter("sub")
+            if self._preload
+            else output.get_subcatch_series
+        )
+
         values = self._model_series(
             subcatchmentIndexArray,
             attributeIndexArray,
             startIndex,
             endIndex,
             columns,
-            output.get_subcatch_series,
+            getter,
         )
 
         if not asframe:
@@ -1462,13 +1548,19 @@ class Output(object):
         startIndex = self._time2step(start, 0)[0]
         endIndex = self._time2step(end, self._period)[0]
 
+        getter = (
+            self._memory_series_getter("node")
+            if self._preload
+            else output.get_node_series
+        )
+
         values = self._model_series(
             nodeIndexArray,
             attributeIndexArray,
             startIndex,
             endIndex,
             columns,
-            output.get_node_series,
+            getter,
         )
 
         if not asframe:
@@ -1572,39 +1664,40 @@ class Output(object):
         Pull a wide-form dataframe for all parameters for a link
 
         >>> out.node_series('COND1', out.link_attributes)
-                            flow_rate  flow_depth  flow_velocity  flow_volume  capacity  groundwater  pol_rainfall        sewage
-        datetime
-        1900-01-01 00:05:00   0.000031    0.053857       0.001116    23.910770  0.024351    79.488449      0.000000  0.000000e+00
-        1900-01-01 00:10:00   0.000280    0.134876       0.004258    76.354103  0.080857    93.174545      0.000000  0.000000e+00
-        1900-01-01 00:15:00   0.000820    0.165356       0.009518    99.407425  0.108456    91.125893      0.000000  0.000000e+00
-        1900-01-01 00:20:00   0.001660    0.188868       0.016023   117.895081  0.131204    88.518318      0.000000  0.000000e+00
-        1900-01-01 00:25:00   0.002694    0.206378       0.022971   131.773941  0.148936    86.187752      0.000000  0.000000e+00
-        ...                        ...         ...            ...          ...       ...          ...           ...           ...
-        1900-01-01 23:40:00   0.037800    0.312581       0.180144   212.443344  0.267168    31.683731     68.344780  6.173063e-08
-        1900-01-01 23:45:00   0.037800    0.312581       0.180144   212.443344  0.267168    31.788561     68.242958  5.872794e-08
-        1900-01-01 23:50:00   0.037800    0.312581       0.180144   212.443344  0.267168    31.890982     68.144737  5.583060e-08
-        1900-01-01 23:55:00   0.037800    0.312581       0.180144   212.443344  0.267168    31.988274     68.052620  5.311425e-08
-        1900-01-02 00:00:00   0.037800    0.312581       0.180144   212.443344  0.267168    32.083355     67.963829  5.049533e-08
+                             flow_rate  flow_depth  ...  pol_rainfall        sewage
+        datetime                                    ...
+        1900-01-01 00:05:00   0.000031    0.053857  ...      0.000000  0.000000e+00
+        1900-01-01 00:10:00   0.000280    0.134876  ...      0.000000  0.000000e+00
+        1900-01-01 00:15:00   0.000820    0.165356  ...      0.000000  0.000000e+00
+        1900-01-01 00:20:00   0.001660    0.188868  ...      0.000000  0.000000e+00
+        1900-01-01 00:25:00   0.002694    0.206378  ...      0.000000  0.000000e+00
+        ...                        ...         ...  ...           ...           ...
+        1900-01-01 23:40:00   0.037800    0.312581  ...     68.344780  6.173063e-08
+        1900-01-01 23:45:00   0.037800    0.312581  ...     68.242958  5.872794e-08
+        1900-01-01 23:50:00   0.037800    0.312581  ...     68.144737  5.583060e-08
+        1900-01-01 23:55:00   0.037800    0.312581  ...     68.052620  5.311425e-08
+        1900-01-02 00:00:00   0.037800    0.312581  ...     67.963829  5.049533e-08
 
         [288 rows x 8 columns]
 
         Pull a long-form dataframe of all links and attributes
 
-        >>> out.node_series(out.links, out.link_attributes, columns=None)
-                                    flow_rate  flow_depth  flow_velocity  flow_volume  capacity  groundwater  pol_rainfall    sewage
-        datetime            element
-        1900-01-01 00:05:00 COND1     0.000031    0.053857       0.001116    23.910770  0.024351    79.488449      0.000000   0.00000
-        1900-01-01 00:10:00 COND1     0.000280    0.134876       0.004258    76.354103  0.080857    93.174545      0.000000   0.00000
-        1900-01-01 00:15:00 COND1     0.000820    0.165356       0.009518    99.407425  0.108456    91.125893      0.000000   0.00000
-        1900-01-01 00:20:00 COND1     0.001660    0.188868       0.016023   117.895081  0.131204    88.518318      0.000000   0.00000
-        1900-01-01 00:25:00 COND1     0.002694    0.206378       0.022971   131.773941  0.148936    86.187752      0.000000   0.00000
-        ...                                ...         ...            ...          ...       ...          ...           ...       ...
-        1900-01-01 23:40:00 WR1       0.000000    0.000000       0.000000     0.000000  1.000000    15.293419     39.303375  45.43092
-        1900-01-01 23:45:00 WR1       0.000000    0.000000       0.000000     0.000000  1.000000    15.313400     39.292118  45.43092
-        1900-01-01 23:50:00 WR1       0.000000    0.000000       0.000000     0.000000  1.000000    15.333243     39.281300  45.43092
-        1900-01-01 23:55:00 WR1       0.000000    0.000000       0.000000     0.000000  1.000000    15.352408     39.271194  45.43092
-        1900-01-02 00:00:00 WR1       0.000000    0.000000       0.000000     0.000000  1.000000    15.371475     39.261478  45.43092
-        [2304 rows x 8 columns]
+        >>> out.link_series(out.links, out.link_attributes, columns=None)
+                                                  result
+        datetime            element attribute
+        1900-01-01 00:05:00 COND1   flow_rate   0.000031
+        1900-01-01 00:10:00 COND1   flow_rate   0.000280
+        1900-01-01 00:15:00 COND1   flow_rate   0.000820
+        1900-01-01 00:20:00 COND1   flow_rate   0.001660
+        1900-01-01 00:25:00 COND1   flow_rate   0.002694
+        ...                                          ...
+        1900-01-01 23:40:00 WR1     sewage     45.430920
+        1900-01-01 23:45:00 WR1     sewage     45.430920
+        1900-01-01 23:50:00 WR1     sewage     45.430920
+        1900-01-01 23:55:00 WR1     sewage     45.430920
+        1900-01-02 00:00:00 WR1     sewage     45.430920
+
+        [18432 rows x 1 columns]
 
         Pull flow timeseries and pollutant tracer concentrations for a link and plot
 
@@ -1640,7 +1733,6 @@ class Output(object):
             fig.legend(bbox_to_anchor=(1,1),bbox_transform=ax.transAxes)
             fig.tight_layout()
 
-
             fig.show()
 
         """
@@ -1653,13 +1745,19 @@ class Output(object):
         startIndex = self._time2step(start, 0)[0]
         endIndex = self._time2step(end, self._period)[0]
 
+        getter = (
+            self._memory_series_getter("link")
+            if self._preload
+            else output.get_link_series
+        )
+
         values = self._model_series(
             linkIndexArray,
             attributeIndexArray,
             startIndex,
             endIndex,
             columns,
-            output.get_link_series,
+            getter,
         )
 
         if not asframe:
@@ -1750,9 +1848,15 @@ class Output(object):
         startIndex = self._time2step(start, 0)[0]
         endIndex = self._time2step(end, self._period)[0]
 
+        getter = (
+            self._memory_series_getter("sys")
+            if self._preload
+            else output.get_system_series
+        )
+
         values = stack(
             [
-                output.get_system_series(self._handle, sysAttr, startIndex, endIndex)
+                getter(self._handle, sysAttr, startIndex, endIndex)
                 for sysAttr in attributeIndexArray
             ],
             axis=1,

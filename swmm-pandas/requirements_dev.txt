@@ -1,7 +1,6 @@
 pip
 bump2version
 wheel
-watchdog
 flake8
 coverage
 Sphinx
@@ -10,7 +9,9 @@ pytest
 black
 numpydoc
 nbsphinx
-pydata-sphinx-theme
-sphinx-rtd-theme
+sphinx-autobuild
 matplotlib
 myst-parser
+furo
+ipython
+mypy

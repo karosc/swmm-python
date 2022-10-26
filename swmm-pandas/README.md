@@ -4,7 +4,7 @@
 
 [![image](https://img.shields.io/pypi/v/swmm-pandas.svg)](https://pypi.python.org/pypi/swmm-pandas)
 [![image](https://img.shields.io/badge/docs-pages-success)](https://karosc.github.io/swmm-python/)
-
+[![image](http://www.mypy-lang.org/static/mypy_badge.svg)](http://mypy-lang.org/)
 ## What and Why?
 
 swmm-pandas is a high level api for interacting with swmm files via pandas dataframes. The ambition of this project is to create concise interfaces for the SWMM input, report and output files.

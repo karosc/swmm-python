@@ -108,7 +108,6 @@ JUNC1            1.5        10.25      0          0          5000
 JUNC2            -1.04      6.2        0          0          5000      
 JUNC3            -3.47      11.5       0          0          5000      
 JUNC4            -5.25      13.8       0          0          5000      
-JUNC5            -6.5       13.2       0          0          5000      
 JUNC6            0          9          0          200        0         
 
 [OUTFALLS]
@@ -120,7 +119,8 @@ OUT2             -1.04      FREE                        NO
 [STORAGE]
 ;;Name           Elev.    MaxDepth   InitDepth  Shape      Curve Name/Params            N/A      Fevap    Psi      Ksat     IMD     
 ;;-------------- -------- ---------- ----------- ---------- ---------------------------- -------- --------          -------- --------
-STOR1            -15.25   21.75      0          FUNCTIONAL 413       0         0        0        0       
+STOR1            -15.25   21.75      0          FUNCTIONAL 413       1         2        0        3       
+JUNC5            -6.5     13.2       0          TABULAR    Store1                       0        2        2        2        0.5     
 
 [CONDUITS]
 ;;Name           From Node        To Node          Length     Roughness  InOffset   OutOffset  InitFlow   MaxFlow   
@@ -175,6 +175,10 @@ JUNC4            FLOW             0.7        "HOURLY"
 ;;-------------- ---------- ---------- ----------
 P1               Pump4      0          0         
 P1                          7          5.8       
+;
+Store1           Storage    1          20        
+Store1                      2          30        
+Store1                      3          40        
 
 [TIMESERIES]
 ;;Name           Date       Time       Value     
@@ -532,7 +536,6 @@ HOURLY                      1.100000 1.140000 1.120000 1.060000 1.020000 0.80000
 
 [REPORT]
 ;;Reporting Options
-INPUT      NO
 CONTROLS   YES
 AVERAGES   YES
 SUBCATCHMENTS ALL
@@ -552,11 +555,11 @@ JUNC1            78.624             268.191
 JUNC2            78.649             268.101           
 JUNC3            78.668             268.044           
 JUNC4            78.675             267.990           
-JUNC5            78.671             267.917           
 JUNC6            78.659             267.919           
 OUT1             78.655             267.918           
 OUT2             78.658             268.103           
 STOR1            78.664             267.918           
+JUNC5            78.671             267.917           
 
 [VERTICES]
 ;;Link           X-Coord            Y-Coord           

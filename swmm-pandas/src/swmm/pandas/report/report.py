@@ -6,7 +6,7 @@ from pandas.core.api import DataFrame, Timestamp, to_datetime, to_timedelta, Ser
 from pandas.io.parsers import read_csv, read_fwf
 
 
-class Report(object):
+class Report:
     _rptfile: str
     """path to swmm rpt file"""
 

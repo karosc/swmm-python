@@ -3,7 +3,6 @@
 :relative-images:
 ```
 
-
 ```{eval-rst}
 Contents:
 =========
@@ -16,5 +15,3 @@ Contents:
    reference/index.rst
 
 ```
-
-

@@ -172,7 +172,7 @@ class Report:
             re.sub(R"(?<=\w)[^\S\r\n](?=\w)", "_", field[1].dropna().str.cat(sep="_"))
             for field in read_fwf(
                 StringIO(re.sub(R"\*|-", " ", header)), header=None
-            ).iteritems()
+            ).items()
         ]
 
         # split day and time into separate fields to be recombined in to datetime object
@@ -226,7 +226,7 @@ class Report:
         if "Time_of_Max" in df.columns:
 
             # convert time of max to timedelta
-            df["Time_of_Max"] = to_timedelta(df.pop("days"), unit="D") + to_timedelta(
+            df["Time_of_Max"] = to_timedelta(df.pop("days").astype(int), unit="D") + to_timedelta(
                 df["Time_of_Max"] + ":00"
             )
         return df
@@ -515,7 +515,7 @@ class Report:
         if not hasattr(self, "_node_depth_summary"):
             header, data = self._split_section(self._sections["Node Depth Summary"])
             self._node_depth_summary = self._parse_table(
-                self._parse_header(header), data
+                self._parse_header(header), data, sep = '\s{1,}|\s:\s'
             )
         return self._node_depth_summary
 
@@ -630,7 +630,7 @@ class Report:
             header, data = self._split_section(self._sections["Link Flow Summary"])
             header = header.replace("|", " ")
             self._link_flow_summary = self._parse_table(
-                self._parse_header(header), data
+                self._parse_header(header), data,sep = '\s{1,}|\s:\s'
             )
         return self._link_flow_summary
 

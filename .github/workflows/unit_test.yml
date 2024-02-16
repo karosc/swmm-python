@@ -59,7 +59,7 @@ jobs:
           cd build
           ../configure
           make
-          make install
+          sudo make install
           cd ../..
 
       - name: Build wheel in virtual env

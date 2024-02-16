@@ -48,6 +48,20 @@ jobs:
       - name: Install required system packages
         run: ${{matrix.sys_pkgs}}
 
+      - name: Run on Linux
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          apt remove swig4.0
+          git clone https://github.com/swig/swig.git
+          cd swig
+          mkdir build
+          sh ./autogen.sh
+          cd build
+          ../configure
+          make
+          make install
+          cd ../..
+
       - name: Build wheel in virtual env
         run: |
           python -m venv --clear ./build-env

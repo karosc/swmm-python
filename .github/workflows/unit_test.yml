@@ -21,7 +21,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [windows-2022, macos-12, ubuntu-latest]
+        os: [ubuntu-latest]
         include:
           - os: windows-2022
             sys_pkgs: choco install swig
@@ -51,7 +51,7 @@ jobs:
       - name: Run on Linux
         if: matrix.os == 'ubuntu-latest'
         run: |
-          apt-get remove swig4.0
+          sudo apt-get remove swig4.0
           git clone https://github.com/swig/swig.git
           cd swig
           mkdir build

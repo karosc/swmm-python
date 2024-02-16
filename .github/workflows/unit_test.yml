@@ -23,13 +23,13 @@ jobs:
       matrix:
         os: [ubuntu-latest]
         include:
-          - os: windows-2022
-            sys_pkgs: choco install swig
-            activate: ./build-env/Scripts/activate
+          # - os: windows-2022
+          #   sys_pkgs: choco install swig
+          #   activate: ./build-env/Scripts/activate
 
-          - os: macos-12
-            sys_pkgs: brew install swig ninja
-            activate: source ./build-env/bin/activate
+          # - os: macos-12
+          #   sys_pkgs: brew install swig ninja
+          #   activate: source ./build-env/bin/activate
           
           - os: ubuntu-latest
             activate: source ./build-env/bin/activate

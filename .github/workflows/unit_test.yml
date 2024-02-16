@@ -51,7 +51,7 @@ jobs:
       - name: Run on Linux
         if: matrix.os == 'ubuntu-latest'
         run: |
-          apt remove swig4.0
+          apt-get remove swig4.0
           git clone https://github.com/swig/swig.git
           cd swig
           mkdir build

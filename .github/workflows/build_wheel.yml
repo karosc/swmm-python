@@ -67,7 +67,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [windows-11-arm]
+        os: [windows-11-arm, ubuntu-24.04, "windows-2025", "macos-15"]
     steps:
       - name: Checkout repo
         uses: actions/checkout@v5
@@ -89,7 +89,7 @@ jobs:
           # CIBW_ENVIRONMENT_WINDOWS: |
           #   NO_STABLE_ABI=1
           # skip 3.8 and any free threaded variants
-          CIBW_SKIP: cp38-* cp3??t-* cp39-* cp310-* cp312-* cp313-* cp314-*
+          CIBW_SKIP: cp38-* cp3??t-* cp39-* cp310-* cp311-* cp312-*
           CIBW_ARCHS: native
           CIBW_BUILD_VERBOSITY: 1
       - uses: actions/upload-artifact@v4
